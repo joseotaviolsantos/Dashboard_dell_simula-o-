@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dell Brasil Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}body{background:#f2f5f9;padding:16px}:root{--dell-blue:#0076C8;--dell-blue-dark:#004B87;--dell-gray:#f0f3f6;--white:#fff;--radius:16px}.header{background:var(--white);border-radius:var(--radius);padding:16px 20px;box-shadow:0 8px 24px rgba(0,118,200,0.12);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;border-left:6px solid var(--dell-blue)}.header-left{display:flex;align-items:center;gap:12px}.header-left h1{font-size:20px;color:var(--dell-blue-dark)}.header-left h1 span{font-weight:300;color:#5E6F8D}.badge-dell{background:#e6f0fa;color:var(--dell-blue);padding:2px 14px;border-radius:50px;font-size:11px;font-weight:600}.filters{background:var(--white);border-radius:var(--radius);padding:16px 20px;box-shadow:0 8px 24px rgba(0,118,200,0.08);display:flex;flex-wrap:wrap;gap:12px 20px;margin-bottom:20px;align-items:flex-end}.filter-group{display:flex;flex-direction:column;gap:4px;flex:1 0 120px}.filter-group label{font-size:11px;font-weight:600;color:#5E6F8D;text-transform:uppercase}.filter-group select,.filter-group input{padding:8px 12px;border:1.5px solid #dce2ec;border-radius:10px;font-size:13px;background:var(--white)}.filter-group select:focus,.filter-group input:focus{outline:none;border-color:var(--dell-blue);box-shadow:0 0 0 3px rgba(0,118,200,0.15)}.btn-dell{background:var(--dell-blue);color:#fff;border:none;padding:8px 22px;border-radius:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}.btn-dell:hover{background:var(--dell-blue-dark)}.btn-outline{background:transparent;color:var(--dell-blue);border:1.5px solid var(--dell-blue);padding:8px 18px;border-radius:10px;font-weight:600;cursor:pointer}.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:20px}.kpi-card{background:var(--white);border-radius:var(--radius);padding:16px 20px;box-shadow:0 4px 16px rgba(0,118,200,0.08);border-left:4px solid var(--dell-blue)}.kpi-card .kpi-label{font-size:11px;font-weight:600;color:#5E6F8D;display:flex;align-items:center;gap:6px}.kpi-card .kpi-value{font-size:26px;font-weight:700;color:var(--dell-blue-dark);margin-top:4px}.kpi-card .kpi-sub{font-size:12px;color:#5E6F8D;margin-top:2px}.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}.chart-box{background:var(--white);border-radius:var(--radius);padding:16px 18px;box-shadow:0 4px 16px rgba(0,118,200,0.08)}.chart-box h3{font-size:14px;color:var(--dell-blue-dark);margin-bottom:10px;display:flex;align-items:center;gap:8px}.chart-container{height:220px;position:relative}.table-wrap{background:var(--white);border-radius:var(--radius);padding:16px 18px;box-shadow:0 4px 16px rgba(0,118,200,0.08);overflow-x:auto}.table-wrap h3{font-size:14px;color:var(--dell-blue-dark);margin-bottom:10px;display:flex;align-items:center;gap:8px}table{width:100%;border-collapse:collapse;font-size:12px}thead th{background:var(--dell-gray);padding:8px 10px;text-align:left;font-weight:600;border-bottom:2px solid #dce2ec}tbody td{padding:6px 10px;border-bottom:1px solid #edf0f5}tbody tr:hover{background:#e6f0fa}.status-badge{display:inline-block;padding:1px 10px;border-radius:50px;font-size:10px;font-weight:600}.status-badge.faturado{background:#e6f7e6;color:#1e7e34}.status-badge.entregue{background:#e6f0fa;color:#004b87}.status-badge.fechado{background:#fff3e6;color:#b45a1c}@media(max-width:700px){.chart-grid{grid-template-columns:1fr}.kpi-row{grid-template-columns:1fr 1fr}.filters{flex-direction:column;align-items:stretch}.filter-group{flex:1 1 auto}}
+</style>
+</head>
+<body>
+<div class="header"><div class="header-left"><i class="fas fa-laptop" style="font-size:28px;color:var(--dell-blue)"></i><h1>Dell <span>Brasil</span></h1><span class="badge-dell"><i class="fas fa-chart-line"></i> Dashboard</span></div><div><i class="fas fa-database"></i> <span id="rowCount">1000</span> registros</div></div>
+<div class="filters" id="filterSection">
+<div class="filter-group"><label><i class="fas fa-map"></i> Região</label><select id="filterRegiao"><option value="all">Todas</option><option value="Norte">Norte</option><option value="Nordeste">Nordeste</option><option value="Centro-Oeste">Centro-Oeste</option><option value="Sul">Sul</option><option value="Sudeste">Sudeste</option></select></div>
+<div class="filter-group"><label><i class="fas fa-box"></i> Produto</label><select id="filterProduto"><option value="all">Todos</option></select></div>
+<div class="filter-group"><label><i class="fas fa-dollar-sign"></i> Valor Mín</label><input type="number" id="filterValorMin" value="0" step="100"></div>
+<div class="filter-group"><label><i class="fas fa-dollar-sign"></i> Valor Máx</label><input type="number" id="filterValorMax" value="500000" step="100"></div>
+<div class="filter-group"><label><i class="fas fa-hashtag"></i> Qtd Mín</label><input type="number" id="filterQtdMin" value="0" step="1"></div>
+<div class="filter-group"><label><i class="fas fa-hashtag"></i> Qtd Máx</label><input type="number" id="filterQtdMax" value="20" step="1"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-dell" id="applyFilters"><i class="fas fa-sliders-h"></i> Filtrar</button><button class="btn-outline" id="resetFilters"><i class="fas fa-undo"></i> Reset</button></div>
+</div>
+<div class="kpi-row"><div class="kpi-card"><div class="kpi-label"><i class="fas fa-crown"></i> Produto + Vendido</div><div class="kpi-value" id="kpiTopProduct">—</div><div class="kpi-sub" id="kpiTopProductSub"></div></div><div class="kpi-card"><div class="kpi-label"><i class="fas fa-fire"></i> Maior Demanda</div><div class="kpi-value" id="kpiTopDemand">—</div><div class="kpi-sub" id="kpiTopDemandSub"></div></div><div class="kpi-card"><div class="kpi-label"><i class="fas fa-store"></i> Canal + Usado</div><div class="kpi-value" id="kpiTopChannel">—</div><div class="kpi-sub" id="kpiTopChannelSub"></div></div><div class="kpi-card"><div class="kpi-label"><i class="fas fa-receipt"></i> Total Vendas</div><div class="kpi-value" id="kpiTotalRevenue">—</div><div class="kpi-sub" id="kpiTotalSub"></div></div></div>
+<div class="chart-grid"><div class="chart-box"><h3><i class="fas fa-chart-bar"></i> Vendas por Produto</h3><div class="chart-container"><canvas id="chartProdutos"></canvas></div></div><div class="chart-box"><h3><i class="fas fa-chart-pie"></i> Canal</h3><div class="chart-container"><canvas id="chartCanal"></canvas></div></div><div class="chart-box"><h3><i class="fas fa-map"></i> Região</h3><div class="chart-container"><canvas id="chartRegiao"></canvas></div></div><div class="chart-box"><h3><i class="fas fa-chart-line"></i> Receita por Produto</h3><div class="chart-container"><canvas id="chartReceita"></canvas></div></div></div>
+<div class="table-wrap"><h3><i class="fas fa-table"></i> Detalhes</h3><div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Região</th><th>Estado</th><th>Produto</th><th>Qtd</th><th>Preço</th><th>Receita</th><th>Canal</th><th>Status</th></tr></thead><tbody id="tableBody"></tbody></table></div><div style="margin-top:8px;font-size:12px;color:#5E6F8D">Exibindo <span id="tableCount">0</span> registros</div></div>
+<script>
+// ===== DADOS (1000 registros) =====
+const rawData = [
+{id:"VENDA00001",regiao:"Norte",estado:"AM",canal:"Direto",segmento:"Pessoa Física",produto:"Notebook Latitude",qtd:9,preco:6726.38,desconto:0.028,receita:58842.37,status:"Faturado"},
+{id:"VENDA00002",regiao:"Norte",estado:"CE",canal:"Parceiro",segmento:"Pessoa Física",produto:"Notebook Latitude",qtd:3,preco:6091.04,desconto:0.101,receita:16427.53,status:"Faturado"},
+{id:"VENDA00003",regiao:"Nordeste",estado:"DF",canal:"Corporate",segmento:"Governo",produto:"OptiPlex Desktop",qtd:19,preco:7532.22,desconto:0.174,receita:118210.66,status:"Faturado"},
+{id:"VENDA00004",regiao:"Centro-Oeste",estado:"SC",canal:"E-commerce",segmento:"SMB",produto:"PowerEdge Server",qtd:11,preco:3273.49,desconto:0.076,receita:33271.75,status:"Entregue"},
+{id:"VENDA00005",regiao:"Sul",estado:"PR",canal:"E-commerce",segmento:"Pessoa Física",produto:"Precision Workstation",qtd:4,preco:24349.4,desconto:0.076,receita:89995.38,status:"Fechado"},
+{id:"VENDA00006",regiao:"Nordeste",estado:"RJ",canal:"Corporate",segmento:"Governo",produto:"Notebook Latitude",qtd:8,preco:19508.25,desconto:0.197,receita:125321,status:"Faturado"},
+{id:"VENDA00007",regiao:"Norte",estado:"PA",canal:"Parceiro",segmento:"Pessoa Física",produto:"XPS",qtd:12,preco:9397.55,desconto:0.134,receita:97659.34,status:"Entregue"},
+{id:"VENDA00008",regiao:"Sul",estado:"RS",canal:"E-commerce",segmento:"SMB",produto:"XPS",qtd:15,preco:9982.82,desconto:0.198,receita:120093.32,status:"Fechado"},
+{id:"VENDA00009",regiao:"Sul",estado:"DF",canal:"E-commerce",segmento:"Enterprise",produto:"Monitor 27",qtd:13,preco:7279.33,desconto:0.042,receita:90656.78,status:"Entregue"},
+{id:"VENDA00010",regiao:"Sul",estado:"CE",canal:"E-commerce",segmento:"Pessoa Física",produto:"Alienware",qtd:15,preco:4257.49,desconto:0.028,receita:62074.2,status:"Faturado"},
+{id:"VENDA00011",regiao:"Sudeste",estado:"RJ",canal:"Direto",segmento:"SMB",produto:"Monitor 27",qtd:8,preco:24935.28,desconto:0.028,receita:193896.74,status:"Fechado"},
+{id:"VENDA00012",regiao:"Sudeste",estado:"CE",canal:"E-commerce",segmento:"Pessoa Física",produto:"Alienware",qtd:20,preco:2337.37,desconto:0.076,receita:43194.6,status:"Fechado"},
+{id:"VENDA00013",regiao:"Centro-Oeste",estado:"BA",canal:"Parceiro",segmento:"Educação",produto:"Precision Workstation",qtd:9,preco:19400.09,desconto:0.068,receita:162727.95,status:"Fechado"},
+{id:"VENDA00014",regiao:"Centro-Oeste",estado:"AM",canal:"Parceiro",segmento:"Enterprise",produto:"Precision Workstation",qtd:6,preco:13085.9,desconto:0.021,receita:76866.58,status:"Faturado"},
+{id:"VENDA00015",regiao:"Sudeste",estado:"SP",canal:"Direto",segmento:"Governo",produto:"Precision Workstation",qtd:17,preco:23027.54,desconto:0.12,receita:344492,status:"Faturado"},
+{id:"VENDA00016",regiao:"Norte",estado:"DF",canal:"Corporate",segmento:"SMB",produto:"Notebook Latitude",qtd:8,preco:22047.83,desconto:0.189,receita:143046.32,status:"Entregue"},
+{id:"VENDA00017",regiao:"Sul",estado:"PA",canal:"Corporate",segmento:"Enterprise",produto:"XPS",qtd:16,preco:23713.74,desconto:0.033,receita:366898.99,status:"Entregue"},
+{id:"VENDA00018",regiao:"Sudeste",estado:"CE",canal:"Corporate",segmento:"SMB",produto:"Monitor 24",qtd:13,preco:24882.61,desconto:0.13,receita:281422.32,status:"Fechado"},
+{id:"VENDA00019",regiao:"Sul",estado:"RS",canal:"Direto",segmento:"SMB",produto:"Notebook Inspiron",qtd:11,preco:1309.03,desconto:0.111,receita:12801,status:"Entregue"},
+{id:"VENDA00020",regiao:"Norte",estado:"CE",canal:"Parceiro",segmento:"Governo",produto:"PowerEdge Server",qtd:3,preco:22711.16,desconto:0.172,receita:56414.52,status:"Entregue"},
+{id:"VENDA00021",regiao:"Sul",estado:"PA",canal:"Corporate",segmento:"Enterprise",produto:"PowerEdge Server",qtd:18,preco:4001.95,desconto:0.187,receita:58564.54,status:"Faturado"},
+{id:"VENDA00022",regiao:"Sudeste",estado:"BA",canal:"Corporate",segmento:"SMB",produto:"PowerEdge Server",qtd:4,preco:3145.73,desconto:0.086,receita:11500.79,status:"Entregue"},
+{id:"VENDA00023",regiao:"Norte",estado:"RS",canal:"Parceiro",segmento:"Enterprise",produto:"Notebook Latitude",qtd:13,preco:18422.77,desconto:0.16,receita:201176.65,status:"Entregue"},
+{id:"VENDA00024",regiao:"Norte",estado:"PE",canal:"Direto",segmento:"SMB",produto:"XPS",qtd:14,preco:5240.41,desconto:0.093,receita:66542.73,status:"Entregue"},
+{id:"VENDA00025",regiao:"Nordeste",estado:"BA",canal:"Corporate",segmento:"Educação",produto:"Notebook Latitude",qtd:3,preco:23218.08,desconto:0.17,receita:57813.02,status:"Fechado"},
+{id:"VENDA00026",regiao:"Centro-Oeste",estado:"GO",canal:"Corporate",segmento:"Governo",produto:"Notebook Latitude",qtd:6,preco:9971.15,desconto:0.197,receita:48041,status:"Faturado"},
+{id:"VENDA00027",regiao:"Norte",estado:"PA",canal:"Direto",segmento:"Governo",produto:"OptiPlex Desktop",qtd:5,preco:5395.53,desconto:0.044,receita:25790.63,status:"Fechado"},
+{id:"VENDA00028",regiao:"Nordeste",estado:"SP",canal:"Direto",segmento:"Enterprise",produto:"Acessórios",qtd:16,preco:12968.98,desconto:0.171,receita:172020.55,status:"Fechado"},
+{id:"VENDA00029",regiao:"Nordeste",estado:"PA",canal:"Direto",segmento:"Pessoa Física",produto:"PowerEdge Server",qtd:13,preco:3701.26,desconto:0.178,receita:39551.66,status:"Fechado"},
+{id:"VENDA00030",regiao:"Nordeste",estado:"AM",canal:"E-commerce",segmento:"Enterprise",produto:"Acessórios",qtd:19,preco:13451.34,desconto:0.187,receita:207782.85,status:"Faturado"},
+{id:"VENDA00031",regiao:"Norte",estado:"SP",canal:"Corporate",segmento:"Pessoa Física",produto:"XPS",qtd:10,preco:11864.83,desconto:0.186,receita:96579.72,status:"Entregue"},
+{id:"VENDA00032",regiao:"Centro-Oeste",estado:"RJ",canal:"Parceiro",segmento:"Governo",produto:"Notebook Inspiron",qtd:18,preco:5958.33,desconto:0.053,receita:101565.69,status:"Faturado"},
+{id:"VENDA00033",regiao:"Sul",estado:"SP",canal:"E-commerce",segmento:"SMB",produto:"OptiPlex Desktop",qtd:18,preco:17825.67,desconto:0.122,receita:281716.89,status:"Fechado"},
+{id:"VENDA00034",regiao:"Centro-Oeste",estado:"PA",canal:"Parceiro",segmento:"Governo",produto:"Notebook Inspiron",qtd:4,preco:18766.48,desconto:0.031,receita:72738.88,status:"Fechado"},
+{id:"VENDA00035",regiao:"Norte",estado:"RJ",canal:"Corporate",segmento:"Governo",produto:"Precision Workstation",qtd:16,preco:6877.13,desconto:0.182,receita:90007.88,status:"Fechado"},
+{id:"VENDA00036",regiao:"Sudeste",estado:"CE",canal:"Corporate",segmento:"Pessoa Física",produto:"Monitor 27",qtd:5,preco:16218.14,desconto:0.052,receita:76873.98,status:"Fechado"},
+{id:"VENDA00037",regiao:"Sul",estado:"CE",canal:"Parceiro",segmento:"Educação",produto:"Notebook Inspiron",qtd:5,preco:14003.28,desconto:0.167,receita:58323.66,status:"Fechado"},
+{id:"VENDA00038",regiao:"Norte",estado:"SC",canal:"Parceiro",segmento:"Enterprise",produto:"Monitor 24",qtd:12,preco:22555.35,desconto:0.159,receita:227628.59,status:"Entregue"},
+{id:"VENDA00039",regiao:"Sul",estado:"DF",canal:"Parceiro",segmento:"Enterprise",produto:"Monitor 27",qtd:18,preco:22196.06,desconto:0.081,receita:367167.22,status:"Fechado"},
+{id:"VENDA00040",regiao:"Sudeste",estado:"GO",canal:"Parceiro",segmento:"Governo",produto:"Alienware",qtd:1,preco:5140.53,desconto:0.185,receita:4189.53,status:"Fechado"},
+{id:"VENDA00041",regiao:"Sudeste",estado:"SC",canal:"E-commerce",segmento:"Enterprise",produto:"Alienware",qtd:2,preco:21577.96,desconto:0.044,receita:41257.06,status:"Fechado"},
+{id:"VENDA00042",regiao:"Centro-Oeste",estado:"SC",canal:"Corporate",segmento:"Pessoa Física",produto:"PowerEdge Server",qtd:13,preco:8743.94,desconto:0.173,receita:94006.1,status:"Faturado"},
+{id:"VENDA00043",regiao:"Centro-Oeste",estado:"SP",canal:"Direito",segmento:"Pessoa Física",produto:"Notebook Inspiron",qtd:9,preco:5121.34,desconto:0.193,receita:37196.29,status:"Faturado"},
+{id:"VENDA00044",regiao:"Sudeste",estado:"PA",canal:"Parceiro",segmento:"Governo",produto:"Monitor 27",qtd:14,preco:15470.25,desconto:0.102,receita:194491.98,status:"Fechado"},
+{id:"VENDA00045",regiao:"Nordeste",estado:"SC",canal:"Corporate",segmento:"SMB",produto:"Notebook Latitude",qtd:17,preco:23198.92,desconto:0.108,receita:351788.42,status:"Entregue"},
+{id:"VENDA00046",regiao:"Centro-Oeste",estado:"CE",canal:"E-commerce",segmento:"Educação",produto:"Acessórios",qtd:11,preco:16853.98,desconto:0.025,receita:180758.94,status:"Faturado"},
+{id:"VENDA00047",regiao:"Sudeste",estado:"AM",canal:"Parceiro",segmento:"Pessoa Física",produto:"Monitor 24",qtd:18,preco:3880.36,desconto:0.084,receita:63979.38,status:"Entregue"},
+{id:"VENDA00048",regiao:"Nordeste",estado:"BA",canal:"E-commerce",segmento:"Educação",produto:"Alienware",qtd:18,preco:20976.15,desconto:0.061,receita:354538.89,status:"Faturado"},
+{id:"VENDA00049",regiao:"Nordeste",estado:"AM",canal:"Direito",segmento:"Governo",produto:"PowerEdge Server",qtd:17,preco:12251.11,desconto:0.18,receita:170780.47,status:"Entregue"},
+{id:"VENDA00050",regiao:"Nordeste",estado:"MG",canal:"Direito",segmento:"SMB",produto:"Notebook Inspiron",qtd:8,preco:17081.66,desconto:0.045,receita:130503.88,status:"Fechado"},
+{id:"VENDA00051",regiao:"Sul",estado:"RS",canal:"Corporate",segmento:"Educação",produto:"Acessórios",qtd:3,preco:11821.07,desconto:0.177,receita:29186.22,status:"Faturado"},
+{id:"VENDA00052",regiao:"Norte",estado:"GO",canal:"Corporate",segmento:"Enterprise",produto:"XPS",qtd:1,preco:22402.37,desconto:0.172,receita:18549.16,status:"Fechado"},
+{id:"VENDA00053",regiao:"Norte",estado:"PE",canal:"Parceiro",segmento:"Educação",produto:"OptiPlex Desktop",qtd:2,preco:14289.22,desconto:0.183,receita:23348.59,status:"Entregue"},
+{id:"VENDA00054",regiao:"Sudeste",estado:"PA",canal:"Corporate",segmento:"Pessoa Física",produto:"Precision Workstation",qtd:20,preco:8478.61,desconto:0.151,receita:143966.8,status:"Faturado"},
+{id:"VENDA00055",regiao:"Centro-Oeste",estado:"GO",canal:"Corporate",segmento:"Enterprise",produto:"OptiPlex Desktop",qtd:15,preco:7072.44,desconto:0.049,receita:100888.36,status:"Faturado"},
+{id:"VENDA00056",regiao:"Sul",estado:"RJ",canal:"Parceiro",segmento:"Enterprise",produto:"Notebook Inspiron",qtd:10,preco:6474.74,desconto:0.067,receita:60409.32,status:"Fechado"},
+{id:"VENDA00057",regiao:"Sul",estado:"PE",canal:"Corporate",segmento:"SMB",produto:"XPS",qtd:7,preco:2354.34,desconto:0.082,receita:15128.99,status:"Fechado"},
+{id:"VENDA00058",regiao:"Sul",estado:"BA",canal:"Corporate",segmento:"SMB",produto:"Alienware",qtd:19,preco:23694.7,desconto:0.004,receita:448398.5,status:"Faturado"},
+{id:"VENDA00059",regiao:"Sul",estado:"RS",canal:"Corporate",segmento:"Enterprise",produto:"Alienware",qtd:14,preco:13824.94,desconto:0.147,receita:165097.43,status:"Faturado"},
+{id:"VENDA00060",regiao:"Sudeste",estado:"DF",canal:"Parceiro",segmento:"Educação",produto:"OptiPlex Desktop",qtd:1,preco:10210.34,desconto:0.134,receita:8842.15,status:"Fechado"},
+{id:"VENDA00061",regiao:"Norte",estado:"AM",canal:"Corporate",segmento:"Enterprise",produto:"Notebook Latitude",qtd:13,preco:15123.81,desconto:0.133,receita:170460.46,status:"Faturado"},
+{id:"VENDA00062",regiao:"Centro-Oeste",estado:"SC",canal:"Corporate",segmento:"Governo",produto:"Notebook Latitude",qtd:9,preco:9974.31,desconto:0.042,receita:85998.5,status:"Faturado"},
+{id:"VENDA00063",regiao:"Centro-Oeste",estado:"RS",canal:"Direito",segmento:"SMB",produto:"Notebook Inspiron",qtd:16,preco:1269.08,desconto:0.108,receita:18112.31,status:"Fechado"},
+{id:"VENDA00064",regiao:"Sudeste",estado:"AM",canal:"Direito",segmento:"Pessoa Física",produto:"PowerEdge Server",qtd:1,preco:15836.32,desconto:0.048,receita:15076.18,status:"Fechado"},
+{id:"VENDA00065",regiao:"Norte",estado:"GO",canal:"Parceiro",segmento:"Governo",produto:"Monitor 24",qtd:12,preco:4860.5,desconto:0.121,receita:51268.55,status:"Fechado"},
+{id:"VENDA00066",regiao:"Sudeste",estado:"DF",canal:"Parceiro",segmento:"SMB",produto:"Monitor 24",qtd:19,preco:17191.8,desconto:0.192,receita:263928.51,status:"Entregue"},
+{id:"VENDA00067",regiao:"Norte",estado:"GO",canal:"Direito",segmento:"Governo",produto:"Notebook Inspiron",qtd:10,preco:21377.1,desconto:0.12,receita:188118.48,status:"Entregue"},
+{id:"VENDA00068",regiao:"Sudeste",estado:"PE",canal:"Direito",segmento:"Educação",produto:"Monitor 27",qtd:3,preco:13044.25,desconto:0.068,receita:36471.72,status:"Faturado"},
+{id:"VENDA00069",regiao:"Centro-Oeste",estado:"PA",canal:"Corporate",segmento:"Educação",produto:"XPS",qtd:14,preco:5062.51,desconto:0.104,receita:63504.13,status:"Faturado"},
+{id:"VENDA00070",regiao:"Sudeste",estado:"RS",canal:"Corporate",segmento:"Pessoa Física",produto:"Monitor 27",qtd:8,preco:20903.69,desconto:0.017,receita:164386.62,status:"Entregue"},
+{id:"VENDA00071",regiao:"Sudeste",estado:"RS",canal:"E-commerce",segmento:"Governo",produto:"Monitor 27",qtd:1,preco:12762.22,desconto:0.065,receita:11932.68,status:"Faturado"},
+{id:"VENDA00072",regiao:"Nordeste",estado:"RJ",canal:"Parceiro",segmento:"Educação",produto:"Acessórios",qtd:9,preco:14250.14,desconto:0.103,receita:115041.38,status:"Faturado"},
+{id:"VENDA00073",regiao:"Norte",estado:"RJ",canal:"E-commerce",segmento:"Enterprise",produto:"PowerEdge Server",qtd:16,preco:16430.85,desconto:0.098,receita:237130.03,status:"Faturado"},
+{id:"VENDA00074",regiao:"Centro-Oeste",estado:"BA",canal:"E-commerce",segmento:"Governo",produto:"Monitor 24",qtd:19,preco:9730.29,desconto:0.111,receita:164354.33,status:"Entregue"},
+{id:"VENDA00075",regiao:"Nordeste",estado:"SC",canal:"Direito",segmento:"Pessoa Física",produto:"Monitor 24",qtd:10,preco:6883.97,desconto:0.024,receita:67187.55,status:"Entregue"},
+{id:"VENDA00076",regiao:"Sul",estado:"GO",canal:"E-commerce",segmento:"SMB",produto:"PowerEdge Server",qtd:7,preco:18674.23,desconto:0.055,receita:123530.03,status:"Fechado"},
+{id:"VENDA00077",regiao:"Sul",estado:"MG",canal:"E-commerce",segmento:"SMB",produto:"PowerEdge Server",qtd:12,preco:5142.49,desconto:0.003,receita:61524.75,status:"Fechado"},
+{id:"VENDA00078",regiao:"Norte",estado:"SP",canal:"E-commerce",segmento:"Educação",produto:"Monitor 24",qtd:5,preco:16236.45,desconto:0.151,receita:68923.73,status:"Faturado"},
+{id:"VENDA00079",regiao:"Sudeste",estado:"RJ",canal:"Direto",segmento:"Educação",produto:"Monitor 27",qtd:6,preco:24165.04,desconto:0.05,receita:137740.73,status:"Faturado"},
+{id:"VENDA00080",regiao:"Centro-Oeste",estado:"RJ",canal:"Parceiro",segmento:"SMB",produto:"Acessórios",qtd:2,preco:4471.79,desconto:0.162,receita:7494.72,status:"Entregue"},
+{id:"VENDA00081",regiao:"Sul",estado:"BA",canal:"Corporate",segmento:"Educação",produto:"Acessórios",qtd:20,preco:19935.93,desconto:0.045,receita:380776.26,status:"Faturado"},
+{id:"VENDA00082",regiao:"Norte",estado:"GO",canal:"Parceiro",segmento:"Enterprise",produto:"Monitor 24",qtd:19,preco:15828.86,desconto:0.122,receita:264057.04,status:"Faturado"},
+{id:"VENDA00083",regiao:"Norte",estado:"BA",canal:"Corporate",segmento:"Pessoa Física",produto:"XPS",qtd:8,preco:5006.29,desconto:0.015,receita:39449.57,status:"Faturado"},
+{id:"VENDA00084",regiao:"Sudeste",estado:"RJ",canal:"Parceiro",segmento:"Governo",produto:"Notebook Latitude",qtd:8,preco:7772.14,desconto:0.057,receita:58633.02,status:"Entregue"},
+{id:"VENDA00085",regiao:"Centro-Oeste",estado:"MG",canal:"Direto",segmento:"SMB",produto:"Alienware",qtd:4,preco:13978.41,desconto:0.13,receita:48644.87,status:"Fechado"},
+{id:"VENDA00086",regiao:"Sudeste",estado:"DF",canal:"E-commerce",segmento:"Educação",produto:"Acessórios",qtd:19,preco:23092.86,desconto:0.088,receita:400153.08,status:"Faturado"},
+{id:"VENDA00087",regiao:"Sudeste",estado:"DF",canal:"E-commerce",segmento:"Pessoa Física",produto:"Precision Workstation",qtd:16,preco:11393.76,desconto:0.12,receita:160424.14,status:"Faturado"},
+{id:"VENDA00088",regiao:"Sul",estado:"PA",canal:"Direto",segmento:"Governo",produto:"Notebook Inspiron",qtd:8,preco:24078.25,desconto:0.167,receita:160457.46,status:"Entregue"},
+{id:"VENDA00089",regiao:"Centro-Oeste",estado:"MG",canal:"Corporate",segmento:"Educação",produto:"XPS",qtd:16,preco:13358.92,desconto:0.088,receita:194933.36,status:"Fechado"},
+{id:"VENDA00090",regiao:"Nordeste",estado:"SC",canal:"Corporate",segmento:"Educação",produto:"Monitor 27",qtd:14,preco:8866.06,desconto:0.134,receita:107492.11,status:"Faturado"},
+{id:"VENDA00091",regiao:"Centro-Oeste",estado:"RJ",canal:"Corporate",segmento:"Pessoa Física",produto:"Precision Workstation",qtd:2,preco:11806.79,desconto:0.063,receita:22125.92,status:"Fechado"},
+{id:"VENDA00092",regiao:"Sul",estado:"GO",canal:"Corporate",segmento:"Educação",produto:"OptiPlex Desktop",qtd:14,preco:2111.74,desconto:0.104,receita:26489.67,status:"Fechado"},
+{id:"VENDA00093",regiao:"Sudeste",estado:"RJ",canal:"Direto",segmento:"Pessoa Física",produto:"Monitor 24",qtd:18,preco:3970.52,desconto:0.058,receita:67324.14,status:"Fechado"},
+{id:"VENDA00094",regiao:"Nordeste",estado:"RJ",canal:"Corporate",segmento:"SMB",produto:"Monitor 24",qtd:18,preco:1130.92,desconto:0.082,receita:18687.32,status:"Entregue"},
+{id:"VENDA00095",regiao:"Sudeste",estado:"PE",canal:"Parceiro",segmento:"Educação",produto:"OptiPlex Desktop",qtd:10,preco:13114.7,desconto:0.055,receita:123933.91,status:"Entregue"},
+{id:"VENDA00096",regiao:"Nordeste",estado:"RJ",canal:"E-commerce",segmento:"Educação",produto:"Alienware",qtd:7,preco:23109.21,desconto:0.102,receita:145264.49,status:"Faturado"},
+{id:"VENDA00097",regiao:"Sul",estado:"PA",canal:"Corporate",segmento:"Enterprise",produto:"Monitor 24",qtd:1,preco:7644.7,desconto:0.06,receita:7186.02,status:"Faturado"},
+{id:"VENDA00098",regiao:"Sudeste",estado:"PE",canal:"E-commerce",segmento:"Enterprise",produto:"OptiPlex Desktop",qtd:12,preco:8845.05,desconto:0.153,receita:89901.09,status:"Entregue"},
+{id:"VENDA00099",regiao:"Norte",estado:"SC",canal:"Corporate",segmento:"Educação",produto:"Acessórios",qtd:13,preco:6452.21,desconto:0.155,receita:70877.53,status:"Faturado"},
+{id:"VENDA00100",regiao:"Centro-Oeste",estado:"RJ",canal:"Corporate",segmento:"SMB",produto:"OptiPlex Desktop",qtd:2,preco:3855.16,desconto:0.193,receita:6222.23,status:"Entregue"},
+{id:"VENDA00101",regiao:"Nordeste",estado:"RJ",canal:"Corporate",segmento:"Governo",produto:"Notebook Latitude",qtd:5,preco:10721.48,desconto:0.131,receita:46584.83,status:"Faturado"},
+{id:"VENDA00102",regiao:"Sudeste",estado:"SC",canal:"Corporate",segmento:"Pessoa Física",produto:"Notebook Inspiron",qtd:11,preco:21426.66,desconto:0.172,receita:195154.02,status:"Fechado"},
+{id:"VENDA00103",regiao:"Sudeste",estado:"RJ",canal:"Direto",segmento:"Educação",produto:"PowerEdge Server",qtd:10,preco:24937.71,desconto:0.149,receita:212219.91,status:"Fechado"},
+{id:"VENDA00104",regiao:"Centro-Oeste",estado:"SC",canal:"Corporate",segmento:"Enterprise",produto:"Notebook Latitude",qtd:2,preco:8649.87,desconto:0.011,receita:17109.44,status:"Fechado"},
+{id:"VENDA00105",regiao:"Nordeste",estado:"RJ",canal:"Corporate",segmento:"Pessoa Física",produto:"Alienware",qtd:19,preco:17299.57,desconto:0.036,receita:316858.92,status:"Entregue"},
+{id:"VENDA00106",regiao:"Centro-Oeste",estado:"PE",canal:"E-commerce",segmento:"SMB",produto:"OptiPlex Desktop",qtd:19,preco:4263.45,desconto:0.092,receita:73553.04,status:"Faturado"},
+{id:"VENDA00107",regiao:"Sul",estado:"PR",canal:"Corporate",segmento:"Governo",produto:"Precision Workstation",qtd:6,preco:2587.46,desconto:0.189,receita:12590.58,status:"Faturado"},
+{id:"VENDA00108",regiao:"Sudeste",estado:"PA",canal:"E-commerce",segmento:"Pessoa Física",produto:"PowerEdge Server",qtd:13,preco:21450.72,desconto:0.021,receita:273003.31,status:"Faturado"},
+{id:"VENDA00109",regiao:"Norte",estado:"PA",canal:"Corporate",segmento:"Governo",produto:"Notebook Latitude",qtd:13,preco:7442.43,desconto:0.113,receita:85818.66,status:"Fechado"},
+{id:"VENDA00110",regiao:"Nordeste",estado:"AM",canal:"Direto",segmento:"SMB",produto:"PowerEdge Server",qtd:7,preco:15825.57,desconto:0.136,receita:95713.05,status:"Faturado"},
+{id:"VENDA00111",regiao:"Centro-Oeste",estado:"SC",canal:"Corporate",segmento:"Enterprise",produto:"Notebook Latitude",qtd:19,preco:9629.64,desconto:0.026,receita:178206.12,status:"Fechado"},
+{id:"VENDA00112",regiao:"Nordeste",estado:"PR",canal:"Corporate",segmento:"Governo",produto:"Precision Workstation",qtd:12,preco:13646.63,desconto:0.183,receita:133791.56,status:"Entregue"},
+{id:"VENDA00113",regiao:"Nordeste",estado:"AM",canal:"Corporate",segmento:"Pessoa Física",produto:"Notebook Inspiron",qtd:15,preco:24102.02,desconto:0.028,receita:351407.45,status:"Faturado"},
+{id:"VENDA00114",regiao:"Centro-Oeste",estado:"AM",canal:"E-commerce",segmento:"Pessoa Física",produto:"Alienware",qtd:1,preco:7199.9,desconto:0.025,receita:7019.9,status:"Faturado"},
+{id:"VENDA00115",regiao:"Sul",estado:"SC",canal:"Parceiro",segmento:"SMB",produto:"Notebook Inspiron",qtd:8,preco:12209.74,desconto:0.124,receita:85565.86,status:"Entregue"},
+{id:"VENDA00116",regiao:"Norte",estado:"PR",canal:"Corporate",segmento:"SMB",produto:"Monitor 24",qtd:14,preco:3623.56,desconto:0.009,receita:50273.27,status:"Fechado"},
+{id:"VENDA00117",regiao:"Sul",estado:"BA",canal:"Parceiro",segmento:"Educação",produto:"Precision Workstation",qtd:5,preco:10205.23,desconto:0.074,receita:47250.21,status:"Entregue"},
+{id:"VENDA00118",regiao:"Norte",estado:"DF",canal:"E-commerce",segmento:"Enterprise",produto:"OptiPlex Desktop",qtd:20,preco:10676.4,desconto:0.19,receita:172957.68,status:"Faturado"},
+{id:"VENDA00119",regiao:"Sul",estado:"AM",canal:"E-commerce",segmento:"SMB",produto:"PowerEdge Server",qtd:12,preco:3204.38,desconto:0.137,receita:33184.56,status:"Faturado"},
+{id:"VENDA00120",regiao:"Norte",estado:"AM",canal:"Parceiro",segmento:"Pessoa Física",produto:"PowerEdge Server",qtd:4,preco:23766.06,desconto:0.165,receita:79378.64,status:"Fechado"},
+{id:"VENDA00121",regiao:"Nordeste",estado:"RJ",canal:"Parceiro",segmento:"Pessoa Física",produto:"Monitor 27",qtd:8,preco:24729.47,desconto:0.157,receita:166775.55,status:"Fechado"},
+{id:"VENDA00122",regiao:"Centro-Oeste",estado:"MG",canal:"Parceiro",segmento:"Pessoa Física",produto:"Monitor 27",qtd:5,preco:19885.18,desconto:0.119,receita:87594.22,status:"Faturado"},
+{id:"VENDA00123",regiao:"Nordeste",estado:"PA",canal:"E-commerce",segmento:"SMB",produto:"Notebook Inspiron",qtd:1,preco:3989.64,desconto:0.072,receita:3702.39,status:"Fechado"},
+{id:"VENDA00124",regiao:"Norte",estado:"PE",canal:"Corporate",segmento:"Governo",produto:"Notebook Latitude",qtd:5,preco:18749.58,desconto:0.105,receita:83904.37,status:"Entregue"},
+{id:"VENDA00125",regiao:"Sul",estado:"PR",canal:"Corporate",segmento:"SMB",produto:"OptiPlex Desktop",qtd:17,preco:6161.5,desconto:0.123,receita:91861.8,status:"Fechado"},
+{id:"VENDA00126",regiao:"Sudeste",estado:"RJ",canal:"Direito",segmento:"Governo",produto:"Alienware",qtd:14,preco:17403.56,desconto:0.098,receita:219772.16,status:"Entregue"},
+{id:"VENDA00127",regiao:"Sul",estado:"DF",canal:"E-commerce",segmento:"Educação",produto:"Notebook Inspiron",qtd:5,preco:7455.39,desconto:0.127,receita:32542.78,status:"Entregue"},
+{id:"VENDA00128",regiao:"Norte",estado:"AM",canal:"Parceiro",segmento:"Educação",produto:"Monitor 24",qtd:15,preco:13034.34,desconto:0.086,receita:178700.8,status:"Faturado"},
+{id:"VENDA00129",regiao:"Norte",estado:"SC",canal:"Corporate",segmento:"Governo",produto:"Alienware",qtd:11,preco:20823.55,desconto:0.08,receita:210734.33,status:"Entregue"},
+{id:"VENDA00130",regiao:"Norte",estado:"RJ",canal:"Direito",segmento:"Educação",produto:"Monitor 27",qtd:5,preco:17421.07,desconto:0.095,receita:78830.34,status:"Fechado"},
+{id:"VENDA00131",regiao:"Sul",estado:"SC",canal:"Direito",segmento:"Educação",produto:"XPS",qtd:18,preco:2251.54,desconto:0.191,receita:32786.93,status:"Faturado"},
+{id:"VENDA00132",regiao:"Sul",estado:"CE",canal:"Parceiro",segmento:"Enterprise",produto:"Notebook Latitude",qtd:10,preco:15329.92,desconto:0.07,receita:142568.26,status:"Entregue"},
+{id:"VENDA00133",regiao:"Norte",estado:"GO",canal:"E-commerce",segmento:"Pessoa Física",produto:"PowerEdge Server",qtd:4,preco:9272.76,desconto:0.111,receita:32973.93,status:"Fechado"},
+{id:"VENDA00134",regiao:"Norte",estado:"PA",canal:"E-commerce",segmento:"SMB",produto:"Precision Workstation",qtd:20,preco:15648.47,desconto:0.129,receita:272596.35,status:"Fechado"},
+{id:"VENDA00135",regiao:"Nordeste",estado:"PA",canal:"Corporate",segmento:"SMB",produto:"Monitor 24",qtd:11,preco:9294.77,desconto:0.036,receita:98561.74,status:"Fechado"},
+{id:"VENDA00136",regiao:"Centro-Oeste",estado:"MG",canal:"E-commerce",segmento:"Governo",produto:"Notebook Inspiron",qtd:17,preco:6006.22,desconto:0.084,receita:93528.86,status:"Entregue"},
+{id:"VENDA00137",regiao:"Nordeste",estado:"GO",canal:"Direito",segmento:"SMB",produto:"Acessórios",qtd:20,preco:2855.96,desconto:0.011,receita:56490.89,status:"Faturado"},
+{id:"VENDA00138",regiao:"Nordeste",estado:"GO",canal:"Direito",segmento:"Governo",produto:"Alienware",qtd:16,preco:15491.24,desconto:0.083,receita:227287.47,status:"Faturado"},
+{id:"VENDA00139",regiao:"Norte",estado:"RS",canal:"Corporate",segmento:"Pessoa Física",produto:"Monitor 24",qtd:19,preco:12576.51,desconto:0.133,receita:207172.85,status:"Fechado"},
+{id:"VENDA00140",regiao:"Centro-Oeste",estado:"PR",canal:"E-commerce",segmento:"SMB",produto:"PowerEdge Server",qtd:10,preco:23676.84,desconto:0.153,receita:200542.83,status:"Fechado"},
+{id:"VENDA00141",regiao:"Nordeste",estado:"CE",canal:"E-commerce",segmento:"SMB",produto:"Alienware",qtd:6,preco:3926.29,desconto:0.107,receita:21037.06,status:"Faturado"},
+{id:"VENDA00142",regiao:"Centro-Oeste",estado:"PA",canal:"Corporate",segmento:"Pessoa Física",produto:"Alienware",qtd:1,preco:11926.05,desconto:0.016,receita:11735.23,status:"Faturado"},
+{id:"VENDA00143",regiao:"Nordeste",estado:"GO",canal:"Corporate",segmento:"Governo",produto:"Monitor 24",qtd:4,preco:10601.78,desconto:0.193,receita:34222.55,status:"Fechado"},
+{id:"VENDA00144",regiao:"Norte",estado:"BA",canal:"E-commerce",segmento:"Governo",produto:"Notebook Inspiron",qtd:8,preco:11343.37,desconto:0.08,receita:83487.2,status:"Fechado"},
+{id:"VENDA00145",regiao:"Sul",estado:"RS",canal:"E-commerce",segmento:"Governo",produto:"XPS",qtd:3,preco:13153.7,desconto:0.023,receita:38553.49,status:"Entregue"},
+{id:"VENDA00146",regiao:"Sul",estado:"MG",canal:"Direito",segmento:"Enterprise",produto:"PowerEdge Server",qtd:4,preco:4343.95,desconto:0.039,receita:16698.14,status:"Entregue"},
+{id:"VENDA00147",regiao:"Sul",estado:"AM",canal:"E-commerce",segmento:"Governo",produto:"OptiPlex Desktop",qtd:19,preco:19189.03,desconto:0.09,receita:331778.33,status:"Fechado"},
+{id:"VENDA00148",regiao:"Centro-Oeste",estado:"PA",canal:"Direito",segmento:"Governo",produto:"Notebook Inspiron",qtd:16,preco:11501.44,desconto:0.061,receita:172797.63,status:"Entregue"},
+{id:"VENDA00149",regiao:"Centro-Oeste",estado:"RJ",canal:"Direito",segmento:"Pessoa Física",produto:"Monitor 24",qtd:15,preco:11736.32,desconto:0.011,receita:174108.31,status:"Entregue"},
+{id:"VENDA00150",regiao:"Norte",estado:"PE",canal:"Parceiro",segmento:"Governo",produto:"Alienware",qtd:15,preco:14843.97,desconto:0.191,receita:180131.58,status:"Entregue"},
+{id:"VENDA00151",regiao:"Centro-Oeste",estado:"DF",canal:"Direito",segmento:"Pessoa Física",produto:"Precision Workstation",qtd:5,preco:23976.88,desconto:0.09,receita:109094.8,status:"Entregue"},
+{id:"VENDA00152",regiao:"Sul",estado:"CE",canal:"Parceiro",segmento:"Governo",produto:"Notebook Latitude",qtd:8,preco:17924.45,desconto:0.198,receita:115003.27,status:"Faturado"},
+{id:"VENDA00153",regiao:"Norte",estado:"GO",canal:"E-commerce",segmento:"SMB",produto:"Alienware",qtd:14,preco:19542.05,desconto:0.136,receita:236380.64,status:"Faturado"},
+{id:"VENDA00154",regiao:"Sul",estado:"MG",canal:"E-commerce",segmento:"SMB",produto:"Precision Workstation",qtd:13,preco:7676.36,desconto:0.145,receita:85322.74,status:"Entregue"},
+{id:"VENDA00155",regiao:"Sudeste",estado:"MG",canal:"Direto",segmento:"Governo",produto:"Monitor 27",qtd:10,preco:24218.26,desconto:0.14,receita:208277.04,status:"Entregue"},
+{id:"VENDA00156",regiao:"Sul",estado:"RJ",canal:"Corporate",segmento:"Pessoa Física",produto:"Monitor 27",qtd:5,preco:17016.82,desconto:0.166,receita:70960.14,status:"Faturado"},
+{id:"VENDA00157",regiao:"Sudeste",estado:"RS",canal:"Parceiro",segmento:"Enterprise",produto:"Monitor 27",qtd:10,preco:5162.36,desconto:0.043,receita:49403.79,status:"Fechado"},
+{id:"VENDA00158",regiao:"Sul",estado:"SP",canal:"E-commerce",segmento:"Pessoa Física",produto:"Monitor 24",qtd:4,preco:13086.09,desconto:0.108,receita:46691.17,status:"Fechado"},
+{id:"VENDA00159",regiao:"Sul",estado:"GO",canal:"Parceiro",segmento:"Educação",produto:"XPS",qtd:6,preco:5176.47,desconto:0.139,receita:26741.64,status:"Fechado"},
+{id:"VENDA00160",regiao:"Sudeste",estado:"RS",canal:"Parceiro",segmento:"Governo",produto:"Monitor 27",qtd:8,preco:24264.04,desconto:0.122,receita:170430.62,status:"Faturado"},
+{id:"VENDA00161",regiao:"Centro-Oeste",estado:"GO",canal:"Corporate",segmento:"Pessoa Física",produto:"Monitor 27",qtd:19,preco:24623.44,desconto:0.092,receita:424803.59,status:"Entregue"},
+{id:"VENDA00162",regiao:"Centro-Oeste",estado:"SP",canal:"Corporate",segmento:"Governo",produto:"XPS",qtd:7,preco:20190.47,desconto:0.028,receita:137375.96,status:"Entregue"},
+{id:"VENDA00163",regiao:"Centro-Oeste",estado:"PE",canal:"Parceiro",segmento:"Educação",produto:"Precision Workstation",qtd:4,preco:7698.52,desconto:0.153,receita:26082.59,status:"Fechado"},
+{id:"VENDA00164",regiao:"Sudeste",estado:"CE",canal:"E-commerce",segmento:"Enterprise",produto:"OptiPlex Desktop",qtd:12,preco:23317.42,desconto:0.083,receita:256584.89,status:"Faturado"},
+{id:"VENDA00165",regiao:"Centro-Oeste",estado:"GO",canal:"Parceiro",segmento:"Enterprise",produto:"Monitor 27",qtd:8,preco:1482.14,desconto:0.186,receita:9651.7,status:"Fechado"},
+{id:"VENDA00166",regiao:"Sul",estado:"SP",canal:"Direto",segmento:"SMB",produto:"OptiPlex Desktop",qtd:5,preco:19163.96,desconto:0.094,receita:86812.74,status:"Faturado"},
+{id:"VENDA00167",regiao:"Sudeste",estado:"RJ",canal:"E-commerce",segmento:"Enterprise",produto:"XPS",qtd:18,preco:23553.47,desconto:0.122,receita:372239.04,status:"Faturado"},
+{id:"VENDA00168",regiao:"Sudeste",estado:"RJ",canal:"Direto",segmento:"Educação",produto:"Notebook Latitude",qtd:8,preco:10959.78,desconto:0.159,receita:73737.4,status:"Entregue"},
+{id:"VENDA00169",regiao:"Centro-Oeste",estado:"BA",canal:"Direto",segmento:"Pessoa Física",produto:"Notebook Latitude",qtd:17,preco:14716.15,desconto:0.144,receita:214149.41,status:"Faturado"},
+{id:"VENDA00170",regiao:"Sul",estado:"SC",canal:"Direto",segmento:"Pessoa Física",produto:"Acessórios",qtd:14,preco:5333,desconto:0.134,receita:64657.29,status:"Entregue"},
+{id:"VENDA00171",regiao:"Norte",estado:"AM",canal:"Corporate",segmento:"Governo",produto:"Precision Workstation",qtd:18,preco:1292.09,desconto:0.175,receita:19187.54,status:"Faturado"},
+{id:"VENDA00172",regiao:"Norte",estado:"GO",canal:"E-commerce",segmento:"Enterprise",produto:"Monitor 27",qtd:3,preco:9144.22,desconto:0.147,receita:23400.06,status:"Fechado"},
+{id:"VENDA00173",regiao:"Sudeste",estado:"DF",canal:"Corporate",segmento:"Enterprise",produto:"Precision Workstation",qtd:11,preco:20486.91,desconto:0.035,receita:217468.55,status:"Fechado"},
+{id:"VENDA00174",regiao:"Nordeste",estado:"SP",canal:"E-commerce",segmento:"Governo",produto:"OptiPlex Desktop",qtd:2,preco:7901.31,desconto:0.009,receita:15660.4,status:"Entregue"},
+{id:"VENDA00175",regiao:"Nordeste",estado:"PR",canal:"E-commerce",segmento:"SMB",produto:"Precision Workstation",qtd:16,preco:6930.19,desconto:0.151,receita:94139.7,status:"Entregue"},
+{id:"VENDA00176",regiao:"Sudeste",estado:"DF",canal:"Corporate",segmento:"Educação",produto:"Monitor 24",qtd:4,preco:20144.09,desconto:0.087,receita:73566.22,status:"Faturado"},
+{id:"VENDA00177",regiao:"Centro-Oeste",estado:"GO",canal:"Direto",segmento:"Educação",produto:"OptiPlex Desktop",qtd:16,preco:9689.8,desconto:0.159,receita:130385.95,status:"Fechado"},
+{id:"VENDA00178",regiao:"Norte",estado:"SC",canal:"E-commerce",segmento:"Governo",produto:"Acessórios",qtd:6,preco:14000.48,desconto:0.064,receita:78626.7,status:"Faturado"},
+{id:"VENDA00179",regiao:"Centro-Oeste",estado:"PA",canal:"Corporate",segmento:"Governo",produto:"XPS",qtd:15,preco:9307.44,desconto:0.008,receita:138494.71,status:"Entregue"},
+{id:"VENDA00180",regiao:"Nordeste",estado:"SP",canal:"Parceiro",segmento:"Pessoa Física",produto:"Notebook Inspiron",qtd:13,preco:9592.13,desconto:0.16,receita:104746.06,status:"Entregue"},
+{id:"VENDA00181",regiao:"Centro-Oeste",estado:"SC",canal:"Corporate",segmento:"Pessoa Física",produto:"Notebook Latitude",qtd:5,preco:2427.05,desconto:0.156,receita:10242.15,status:"Fechado"},
+{id:"VENDA00182",regiao:"Sul",estado:"MG",canal:"E-commerce",segmento:"Educação",produto:"OptiPlex Desktop",qtd:12,preco:9802.72,desconto:0.153,receita:99634.85,status:"Faturado"},
+{id:"VENDA00183",regiao:"Sul",estado:"BA",canal:"Direto",segmento:"Governo",produto:"PowerEdge Server",qtd:4,preco:1427.1,desconto:0.037,receita:5497.19,status:"Faturado"},
+{id:"VENDA00184",regiao:"Sudeste",estado:"RS",canal:"Direto",segmento:"Enterprise",produto:"PowerEdge Server",qtd:20,preco:7710.96,desconto:0.183,receita:125997.09,status:"Fechado"},
+{id:"VENDA00185",regiao:"Centro-Oeste",estado:"AM",canal:"E-commerce",segmento:"SMB",produto:"XPS",qtd:15,preco:24933.75,desconto:0.162,receita:313417.24,status:"Entregue"},
+{id:"VENDA00186",regiao:"Nordeste",estado:"GO",canal:"E-commerce",segmento:"Pessoa Física",produto:"Monitor 24",qtd:10,preco:21402.96,desconto:0.142,receita:183637.4,status:"Fechado"},
+{id:"VENDA00187",regiao:"Centro-Oeste",estado:"CE",canal:"E-commerce",segmento:"Educação",produto:"PowerEdge Server",qtd:5,preco:6529.02,desconto:0.099,receita:29413.24,status:"Entregue"},
+{id:"VENDA00188",regiao:"Sudeste",estado:"CE",canal:"Corporate",segmento:"Educação",produto:"Acessórios",qtd:3,preco:2391.1,desconto:0.08,receita:6599.44,status:"Entregue"},
+{id:"VENDA00189",regiao:"Sul",estado:"SC",canal:"Parceiro",segmento:"Pessoa Física",produto:"XPS",qtd:11,preco:16344.59,desconto:0.09,receita:163609.35,status:"Entregue"},
+{id:"VENDA00190",regiao:"Norte",estado:"CE",canal:"Parceiro",segmento:"Governo",produto:"XPS",qtd:14,preco:12969.3,desconto:0.174,receita:149976.99,status:"Fechado"},
+{id:"VENDA00191",regiao:"Centro-Oeste",estado:"RJ",canal:"E-commerce",segmento:"Enterprise",produto:"Monitor 27",qtd:8,preco:9173.76,desconto:0.188,receita:59592.74,status:"Entregue"},
+{id:"VENDA00192",regiao:"Norte",estado:"CE",canal:"Parceiro",segmento:"Pessoa Fisica",produto:"Monitor 24",qtd:5,preco:15925.54,desconto:0.123,receita:69833.49,status:"Entregue"},
+{id:"VENDA00193",regiao:"Sul",estado:"SP",canal:"Direto",segmento:"SMB",produto:"XPS",qtd:20,preco:18239.31,desconto:0.121,receita:320647.07,status:"Fechado"},
+{id:"VENDA00194",regiao:"Sudeste",estado:"AM",canal:"E-commerce",segmento:"Governo",produto:"PowerEdge Server",qtd:19,preco:10881.4,desconto:0.128,receita:180283.04,status:"Faturado"},
+{id:"VENDA00195",regiao:"Nordeste",estado:"PE",canal:"Corporate",segmento:"Educacao",produto:"Alienware",qtd:10,preco:11775.77,desconto:0.138,receita:101507.14,status:"Faturado"},
+{id:"VENDA00196",regiao:"Centro-Oeste",estado:"DF",canal:"E-commerce",segmento:"Educacao",produto:"Monitor 27",qtd:20,preco:4276.78,desconto:0.172,receita:70823.48,status:"Fechado"},
+{id:"VENDA00197",regiao:"Norte",estado:"PR",canal:"Corporate",segmento:"Enterprise",produto:"Precision Workstation",qtd:18,preco:3369.65,desconto:0.048,receita:57742.32,status:"Fechado"},
+{id:"VENDA00198",regiao:"Sudeste",estado:"RS",canal:"Parceiro",segmento:"Governo",produto:"Notebook Latitude",qtd:10,preco:23678.31,desconto:0.173,receita:195819.62,status:"Entregue"},
+{id:"VENDA00199",regiao:"Sudeste",estado:"PR",canal:"Corporate",segmento:"SMB",produto:"PowerEdge Server",qtd:6,preco:12858.03,desconto:0.103,receita:69201.92,status:"Fechado"},
+{id:"VENDA00200",regiao:"Centro-Oeste",estado:"SP",canal:"Direto",segmento:"Governo",produto:"Precision Workstation",qtd:15,preco:24193.82,desconto:0.043,receita:347302.29,status:"Faturado"},
+{id:"VENDA00201",regiao:"Nordeste",estado:"PR",canal:"E-commerce",segmento:"Educacao",produto:"Monitor 24",qtd:18,preco:997.89,desconto:0.021,receita:17584.82,status:"Faturado"},
+{id:"VENDA00202",regiao:"Sul",estado:"PR",canal:"Direto",segmento:"Educacao",produto:"Alienware",qtd:2,preco:14600.82,desconto:0.039,receita:28062.78,status:"Entregue"},
+{id:"VENDA00203",regiao:"Sul",estado:"RJ",canal:"Parceiro",segmento:"SMB",produto:"Precision Workstation",qtd:9,preco:20772.53,desconto:0.125,receita:163583.67,status:"Faturado"},
+{id:"VENDA00204",regiao:"Nordeste",estado:"PA",canal:"Corporate",segmento:"Pessoa Fisica",produto:"Monitor 27",qtd:18,preco:23522.56,desconto:0.151,receita:359471.76,status:"Fechado"},
+{id:"VENDA00205",regiao:"Sul",estado:"PE",canal:"Parceiro",segmento:"Pessoa Fisica",produto:"Notebook Latitude",qtd:5,preco:18068.92,desconto:0.161,receita:75799.12,status:"Entregue"},
+{id:"VENDA00206",regiao:"Sul",estado:"DF",canal:"E-commerce",segmento:"Pessoa Fisica",produto:"Monitor 27",qtd:20,preco:8508.43,desconto:0.079,receita:156725.28,status:"Faturado"},
+{id:"VENDA00207",regiao:"Sudeste",estado:"SP",canal:"E-commerce",segmento:"Governo",produto:"Precision Workstation",qtd:18,preco:12654.29,desconto:0.113,receita:202038.39,status:"Entregue"},
+{id:"VENDA00208",regiao:"Norte",estado:"PA",canal:"Corporate",segmento:"Governo",produto:"Alienware",qtd:19,preco:8245.8,desconto:0.18,receita:128469.56,status:"Entregue"},
+{id:"VENDA00209",regiao:"Sul",estado:"GO",canal:"Corporate",segmento:"Enterprise",produto:"Notebook Latitude",qtd:19,preco:12426.86,desconto:0.105,receita:211318.75,status:"Entregue"},
+{id:"VENDA00210",regiao:"Norte",estado:"PE",canal:"E-commerce",segmento:"Educacao",produto:"Notebook Latitude",qtd:19,preco:23746.57,desconto:0.022,receita:441258.76,status:"Fechado"},
+{id:"VENDA00211",regiao:"Sudeste",estado:"DF",canal:"Direto",segmento:"Enterprise",produto:"PowerEdge Server",qtd:14,preco:12944.03,desconto:0.122,receita:159108.02,status:"Entregue"},
+{id:"VENDA00212",regiao:"Sudeste",estado:"SC",canal:"Parceiro",segmento:"Educacao",produto:"Precision Workstation",qtd:11,preco:24954.57,desconto:0.096,receita:248148.24,status:"Entregue"},
+{id:"VENDA00213",regiao:"Centro-Oeste",estado:"PA",canal:"Corporate",segmento:"Enterprise",produto:"Precision Workstation",qtd:12,preco:17156.02,desconto:0.174,receita:170050.47,status:"Fechado"},
+{id:"VENDA00214",regiao:"Centro-Oeste",estado:"GO",canal:"E-commerce",segmento:"Enterprise",produto:"Precision Workstation",qtd:10,preco:6241.78,desconto:0.195,receita:50246.33,status:"Entregue"},
+{id:"VENDA00215",regiao:"Centro-Oeste",estado:"PR",canal:"Direto",segmento:"Pessoa Fisica",produto:"Monitor 27",qtd:16,preco:9241.04,desconto:0.187,receita:120207.45,status:"Entregue"},
+{id:"VENDA00216",regiao:"Nordeste",estado:"PR",canal:"Direto",segmento:"Governo",produto:"Alienware",qtd:13,preco:20604.73,desconto:0.191,receita:216699.95,status:"Entregue"},
+{id:"VENDA00217",regiao:"Nordeste",estado:"RS",canal:"E-commerce",segmento:"Pessoa Fisica",produto:"Monitor 27",qtd:15,preco:16674.52,desconto:0.149,receita:212850.25,status:"Entregue"},
+{id:"VENDA00218",regiao:"Nordeste",estado:"SP",canal:"Parceiro",segmento:"Enterprise",produto:"XPS",qtd:4,preco:15699.38,desconto:0.117,receita:55450.21,status:"Fechado"},
+{id:"VENDA00219",regiao:"Nordeste",estado:"SP",canal:"Parceiro",segmento:"Educacao",produto:"Alienware",qtd:11,preco:18160.06,desconto:0.02,receita:195765.45,status:"Entregue"},
+{id:"VENDA00220",regiao:"Centro-Oeste",estado:"AM",canal:"Direto",segmento:"SMB",produto:"OptiPlex Desktop",qtd:7,preco:19093.05,desconto:0.057,receita:126033.22,status:"Entregue"},
+{id:"VENDA00221",regiao:"Nordeste",estado:"SP",canal:"Corporate",segmento:"Educacao",produto:"Precision Workstation",qtd:2,preco:22900.16,desconto:0.035,receita:44197.31,status:"Fechado"},
+{id:"VENDA00222",regiao:"Centro-Oeste",estado:"PR",canal:"Corporate",segmento:"Pessoa Fisica",produto:"Notebook Latitude",qtd:1,preco:8021.09,desconto:0.121,receita:7050.54,status:"Entregue"},
+{id:"VENDA00223",regiao:"Norte",estado:"SC",canal:"Parceiro",segmento:"Educacao",produto:"XPS",qtd:17,preco:12126.1,desconto:0.039,receita:198104.1,status:"Entregue"},
+{id:"VENDA00224",regiao:"Sul",estado:"AM",canal:"Parceiro",segmento:"Enterprise",produto:"XPS",qtd:1,preco:18626.15,desconto:0.158,receita:15683.22,status:"Entregue"},
+{id:"VENDA00225",regiao:"Norte",estado:"MG",canal:"Parceiro",segmento:"Educacao",produto:"Alienware",qtd:17,preco:8735.83,desconto:0.08,receita:136628.38,status:"Faturado"},
+{id:"VENDA00226",regiao:"Centro-Oeste",estado:"SC",canal:"E-commerce",segmento:"Pessoa Fisica",produto:"Notebook Latitude",qtd:9,preco:10082.5,desconto:0.089,receita:82666.42,status:"Entregue"},
+{id:"VENDA00227",regiao:"Norte",estado:"PE",canal:"E-commerce",segmento:"Enterprise",produto:"Monitor 24",qtd:12,preco:17565,desconto:0.012,receita:208250.64,status:"Faturado"},
+{id:"VENDA00228",regiao:"Centro-Oeste",estado:"PA",canal:"Parceiro",segmento:"Enterprise",produto:"Monitor 24",qtd:4,preco:16256.81,desconto:0.188,receita:52802.12,status:"Fechado"},
+{id:"VENDA00229",regiao:"Sudeste",estado:"DF",canal:"Corporate",segmento:"Pessoa Física",produto:"XPS",qtd:15,preco:18895.18,desconto:0.121,receita:249132.95,status:"Entregue"},
+{id:"VENDA00230",regiao:"Sudeste",estado:"CE",canal:"E-commerce",segmento:"SMB",produto:"PowerEdge Server",qtd:20,preco:21929.87,desconto:0.016,receita:431579.84,status:"Entregue"},
+{id:"VENDA00231",regiao:"Sul",estado:"MG",canal:"Parceiro",segmento:"Governo",produto:"Notebook Latitude",qtd:18,preco:22649.89,desconto:0.04,receita:391390.1,status:"Entregue"},
+{id:"VENDA00232",regiao:"Sul",estado:"PE",canal:"Direito",segmento:"Educação",produto:"Notebook Inspiron",qtd:7,preco:18149.41,desconto:0.098,receita:114595.37,status:"Fechado"},
+{id:"VENDA00233",regiao:"Centro-Oeste",estado:"DF",canal:"Direito",segmento:"Educação",produto:"Alienware",qtd:15,preco:14446.65,desconto:0.112,receita:192429.38,status:"Faturado"},
+{id:"VENDA00234",regiao:"Norte",estado:"CE",canal:"Direito",segmento:"SMB",produto:"PowerEdge Server",qtd:19,preco:2567.31,desconto:0.085,receita:44632.68,status:"Faturado"},
+{id:"VENDA00235",regiao:"Sudeste",estado:"SC",canal:"Corporate",segmento:"Educação",produto:"Monitor 24",qtd:14,preco:5155.55,desconto:0.027,receita:70228.9,status:"Faturado"},
+{id:"VENDA00236",regiao:"Norte",estado:"MG",canal:"Corporate",segmento:"Pessoa Física",produto:"Notebook Inspiron",qtd:18,preco:4018.35,desconto:0.172,receita:59889.49,status:"Fechado"},
+{id:"VENDA00237",regiao:"Sul",estado:"BA",canal:"Corporate",segmento:"Enterprise",produto:"Notebook Latitude",qtd:1,preco:24479.47,desconto:0.093,receita:22202.88,status:"Fechado"},
+{id:"VENDA00238",regiao:"Norte",estado:"SP",canal:"Corporate",segmento:"Pessoa Física",produto:"Monitor 27",qtd:5,preco:7470.72,desconto:0.187,receita:30368.48,status:"Fechado"},
+{id:"VENDA00239",regiao:"Sul",estado:"AM",canal:"Direito",segmento:"Enterprise",produto:"PowerEdge Server",qtd:3,preco:3241.7,desconto:0.007,receita:9657.02,status:"Entregue"},
+{id:"VENDA00240",regiao:"Norte",estado:"MG",canal:"E-commerce",segmento:"Enterprise",produto:"Alienware",qtd:15,preco:6471.01,desconto:0.043,receita:92891.35,status:"Entregue"},
+{id:"VENDA00241",regiao:"Nordeste",estado:"PR",canal:"Parceiro",segmento:"Pessoa Física",produto:"Acessórios",qtd:20,preco:19495.42,desconto:0.164,receita:325963.42,status:"Fechado"},
+{id:"VENDA00242",regiao:"Nordeste",estado:"AM",canal:"Corporate",segmento:"Pessoa Física",produto:"Monitor 24",qtd:9,preco:2275.17,desconto:0.19,receita:16585.99,status:"Faturado"},
+{id:"VENDA00243",regiao:"Sudeste",estado:"BA",canal:"Parceiro",segmento:"Governo",produto:"Monitor 27",qtd:13,preco:19816.47,desconto:0.064,receita:241126.81,status:"Faturado"},
+{id:"VENDA00244",regiao:"Nordeste",estado:"GO",canal:"Corporate",segmento:"SMB",produto:"Precision Workstation",qtd:16,preco:6631.43,desconto:0.045,receita:101328.25,status:"Entregue"},
+{id:"VENDA00245",regiao:"Centro-Oeste",estado:"RS",canal:"E-commerce",segmento:"SMB",produto:"Alienware",qtd:18,preco:13625.8,desconto:0.078,receita:226133.78,status:"Faturado"},
+{id:"VENDA00246",regiao:"Centro-Oeste",estado:"BA",canal:"Direito",segmento:"SMB",produto:"Notebook Inspiron",qtd:18,preco:18334.95,desconto:0.038,receita:317487.99,status:"Fechado"},
+{id:"VENDA00247",regiao:"Centro-Oeste",estado:"SP",canal:"Parceiro",segmento:"Enterprise",produto:"PowerEdge Server",qtd:16,preco:5855.12,desconto:0.181,receita:76725.49,status:"Entregue"},
+{id:"VENDA00248",regiao:"Sudeste",estado:"RS",canal:"E-commerce",segmento:"Governo",produto:"OptiPlex Desktop",qtd:8,preco:17634.16,desconto:0.141,receita:121181.95,status:"Faturado"},
+{id:"VENDA00249",regiao:"Sudeste",estado:"PE",canal:"Direito",segmento:"Educação",produto:"Precision Workstation",qtd:12,preco:8263.82,desconto:0.072,receita:92025.9,status:"Faturado"},
+{id:"VENDA00250",regiao:"Nordeste",estado:"DF",canal:"Parceiro",segmento:"SMB",produto:"Monitor 27",qtd:11,preco:10817.11,desconto:0.113,receita:105542.54,status:"Faturado"},
+{id:"VENDA00251",regiao:"Nordeste",estado:"SC",canal:"Parceiro",segmento:"Educação",produto:"Acessórios",qtd:19,preco:18224.29,desconto:0.059,receita:325832.08,status:"Entregue"},
+{id:"VENDA00252",regiao:"Centro-Oeste",estado:"GO",canal:"Corporate",segmento:"Educação",produto:"OptiPlex Desktop",qtd:18,preco:16641.51,desconto:0.137,receita:258509.22,status:"Faturado"},
+{id:"VENDA00253",regiao:"Nordeste",estado:"CE",canal:"Direito",segmento:"Pessoa Física",produto:"Monitor 27",qtd:6,preco:4187,desconto:0.109,receita:22383.7,status:"Fechado"},
+{id:"VENDA00254",regiao:"Nordeste",estado:"RJ",canal:"Parceiro",segmento:"SMB",produto:"Notebook Latitude",qtd:1,preco:10779.89,desconto:0.169,receita:8958.09,status:"Fechado"},
+{id:"VENDA00255",regiao:"Sul",estado:"PE",canal:"Corporate",segmento:"SMB",produto:"OptiPlex Desktop",qtd:12,preco:2262.89,desconto:0.128,receita:23678.88,status:"Fechado"},
+{id:"VENDA00256",regiao:"Centro-Oeste",estado:"CE",canal:"E-commerce",segmento:"SMB",produto:"Precision Workstation",qtd:14,preco:1086.79,desconto:0.106,receita:13602.26,status:"Entregue"},
+{id:"VENDA00257",regiao:"Nordeste",estado:"RS",canal:"E-commerce",segmento:"Governo",produto:"XPS",qtd:4,preco:23016.78,desconto:0.105,receita:82400.07,status:"Faturado"},
+{id:"VENDA00258",regiao:"Nordeste",estado:"DF",canal:"Parceiro",segmento:"Governo",produto:"Notebook Inspiron",qtd:12,preco:24015.01,desconto:0.092,receita:261667.55,status:"Entregue"},
+{id:"VENDA00259",regiao:"Sudeste",estado:"SP",canal:"Direito",segmento:"Enterprise",produto:"Notebook Latitude",qtd:3,preco:10607.73,desconto:0.075,receita:29436.45,status:"Fechado"},
+{id:"VENDA00260",regiao:"Norte",estado:"CE",canal:"Direito",segmento:"Enterprise",produto:"Alienware",qtd:11,preco:14493.73,desconto:0.172,receita:132008.89,status:"Fechado"},
+{id:"VENDA00261",regiao:"Centro-Oeste",estado:"CE",canal:"Direito",segmento:"Enterprise",produto:"OptiPlex Desktop",qtd:9,preco:1926.8,desconto:0.015,receita:17081.08,status:"Faturado"},
+{id:"VENDA00262",regiao:"Sudeste",estado:"RJ",canal:"E-commerce",segmento:"Enterprise",produto:"PowerEdge Server",qtd:19,preco:4289.44,desconto:0.164,receita:68133.46,status:"Entregue"},
+{id:"VENDA00263",regiao:"Sudeste",estado:"GO",canal:"Parceiro",segmento:"SMB",produto:"Acessórios",qtd:13,preco:17184.25,desconto:0.108,receita:199268.56,status:"Entregue"},
+{id:"VENDA00264",regiao:"Centro-Oeste",estado:"PA",canal:"Corporate",segmento:"Governo",produto:"Notebook Latitude",qtd:4,preco:11377.54,desconto:0.168,receita:37864.45,status:"Fechado"},
+{id:"VENDA00265",regiao:"Sudeste",estado:"BA",canal:"Parceiro",segmento:"Pessoa Física",produto:"OptiPlex Desktop",qtd:16,preco:6320.95,desconto:0.111,receita:89909.19,status:"Entregue"},
+{id:"VENDA00266",regiao:"Norte",estado:"RJ",canal:"E-commerce",segmento:"Enterprise",produto:"Notebook Inspiron",qtd:20,preco:7948.18,desconto:0.049,receita:151174.38,status:"Faturado"},
+{id:"VENDA00267",regiao:"Centro-Oeste",estado:"PE",canal:"E-commerce",segmento:"Governo",produto:"Alienware",qtd:11,preco:9528.95,desconto:0.018,receita:102931.72,status:"Fechado"},
+{id:"VENDA00268",regiao:"Sul",estado:"BA",canal:"Direto",segmento:"SMB",produto:"Notebook Inspiron",qtd:6,preco:11229.7,desconto:0.111,receita:59899.22,status:"Fechado"},
+{id:"VENDA00269",regiao:"Sudeste",estado:"SP",canal:"E-commerce",segmento:"Educação",produto:"Precision Workstation",qtd:3,preco:15245.57,desconto:0.157,receita:38556.05,status:"Faturado"},
+{id:"VENDA00270",regiao:"Sudeste",estado:"MG",canal:"Parceiro",segmento:"Governo",produto:"Precision Workstation",qtd:8,preco:14641.44,desconto:0.034,receita:113149.05,status:"Faturado"},
+{id:"VENDA00271",regiao:"Sudeste",estado:"PR",canal:"Corporate",segmento:"SMB",produto:"OptiPlex Desktop",qtd:5,preco:2331.07,desconto:0.087,receita:10641.33,status:"Faturado"},
+{id:"VENDA00272",regiao:"Norte",estado:"MG",canal:"E-commerce",segmento:"SMB",produto:"PowerEdge Server",qtd:16,preco:15170.11,desconto:0.039,receita:233255.61,status:"Faturado"},
+{id:"VENDA00273",regiao:"Centro-Oeste",estado:"BA",canal:"Parceiro",segmento:"Governo",produto:"Acessórios",qtd:13,preco:20258.65,desconto:0.066,receita:245980.53,status:"Faturado"},
+{id:"VENDA00274",regiao:"Centro-Oeste",estado:"PR",canal:"Corporate",segmento:"Pessoa Física",produto:"OptiPlex Desktop",qtd:11,preco:5098.82,desconto:0.08,receita:51600.06,status:"Fechado"},
+{id:"VENDA00275",regiao:"Norte",estado:"PA",canal:"Parceiro",segmento:"Pessoa Física",produto:"Alienware",qtd:9,preco:20559.17,desconto:0.079,receita:170414.96,status:"Entregue"},
+{id:"VENDA00276",regiao:"Nordeste",estado:"PE",canal:"E-commerce",segmento:"SMB",produto:"Precision Workstation",qtd:1,preco:23862.71,desconto:0.092,receita:21667.34,status:"Faturado"},
+{id:"VENDA00277",regiao:"Sudeste",estado:"GO",canal:"Corporate",segmento:"SMB",produto:"XPS",qtd:10,preco:6656.91,desconto:0.132,receita:57781.98,status:"Faturado"},
+{id:"VENDA00278",regiao:"Sudeste",estado:"CE",canal:"Direto",segmento:"Governo",produto:"Acessórios",qtd:13,preco:13731.69,desconto:0.185,receita:145487.26,status:"Entregue"},
+{id:"VENDA00279",regiao:"Centro-Oeste",estado:"MG",canal:"Direto",segmento:"Pessoa Física",produto:"Acessórios",qtd:3,preco:3446.74,desconto:0.05,receita:9823.21,status:"Entregue"},
+{id:"VENDA00280",regiao:"Nordeste",estado:"CE",canal:"Parceiro",segmento:"Educação",produto:"Monitor 27",qtd:14,preco:3363.86,desconto:0.02,receita:46152.16,status:"Faturado"},
+{id:"VENDA00281",regiao:"Norte",estado:"PE",canal:"Direto",segmento:"Governo",produto:"OptiPlex Desktop",qtd:19,preco:17508.58,desconto:0.03,receita:322683.13,status:"Faturado"},
+{id:"VENDA00282",regiao:"Nordeste",estado:"CE",canal:"Corporate",segmento:"Governo",produto:"Notebook Inspiron",qtd:5,preco:9229.55,desconto:0.069,receita:42963.56,status:"Faturado"},
+{id:"VENDA00283",regiao:"Norte",estado:"SP",canal:"E-commerce",segmento:"SMB",produto:"OptiPlex Desktop",qtd:15,preco:8517.61,desconto:0.06,receita:120098.3,status:"Entregue"},
+{id:"VENDA00284",regiao:"Sul",estado:"BA",canal:"Corporate",segmento:"Enterprise",produto:"PowerEdge Server",qtd:17,preco:5021.77,desconto:0.032,receita:82638.25,status:"Faturado"},
+{id:"VENDA00285",regiao:"Nordeste",estado:"PE",canal:"Corporate",segmento:"Educação",produto:"XPS",qtd:14,preco:10373.09,desconto:0.147,receita:123875.44,status:"Fechado"},
+{id:"VENDA00286",regiao:"Norte",estado:"PA",canal:"Direto",segmento:"Pessoa Física",produto:"PowerEdge Server",qtd:9,preco:19006.28,desconto:0.162,receita:143345.36,status:"Fechado"},
+{id:"VENDA00287",regiao:"Sudeste",estado:"CE",canal:"E-commerce",segmento:"Pessoa Física",produto:"Monitor 27",qtd:7,preco:11872.72,desconto:0.052,receita:78787.37,status:"Faturado"},
+{id:"VENDA00288",regiao:"Sul",estado:"MG",canal:"E-commerce",segmento:"Pessoa Física",produto:"Acessórios",qtd:4,preco:9219.78,desconto:0.169,receita:30646.55,status:"Entregue"},
+{id:"VENDA00289",regiao:"Nordeste",estado:"SC",canal:"Parceiro",segmento:"Pessoa Física",produto:"XPS",qtd:11,preco:3652.25,desconto:0.061,receita:37724.09,status:"Faturado"},
+{id:"VENDA00290",regiao:"Sudeste",estado:"AM",canal:"Parceiro",segmento:"Pessoa Física",produto:"Acessórios",qtd:5,preco:14710.31,desconto:0.085,receita:67299.67,status:"Fechado"},
+{id:"VENDA00291",regiao:"Sul",estado:"SP",canal:"E-commerce",segmento:"SMB",produto:"Monitor 24",qtd:5,preco:5327.79,desconto:0.168,receita:22163.61,status:"Faturado"},
+{id:"VENDA00292",regiao:"Sudeste",estado:"BA",canal:"Corporate",segmento:"Educação",produto:"PowerEdge Server",qtd:13,preco:24124.66,desconto:0.101,receita:281944.9,status:"Entregue"},
+{id:"VENDA00293",regiao:"Nordeste",estado:"PR",canal:"Direto",segmento:"Governo",produto:"OptiPlex Desktop",qtd:6,preco:2800.63,desconto:0.006,receita:16702.96,status:"Fechado"},
+{id:"VENDA00294",regiao:"Sudeste",estado:"CE",canal:"Direto",segmento:"Pessoa Física",produto:"Monitor 24",qtd:6,preco:19693.91,desconto:0.113,receita:104810.99,status:"Fechado"},
+{id:"VENDA00295",regiao:"Sudeste",estado:"CE",canal:"Parceiro",segmento:"Educação",produto:"Precision Workstation",qtd:12,preco:13917.45,desconto:0.151,receita:141790.98,status:"Fechado"},
+{id:"VENDA00296",regiao:"Norte",estado:"PE",canal:"Direto",segmento:"Enterprise",produto:"Monitor 24",qtd:2,preco:11683.52,desconto:0.07,receita:21731.35,status:"Fechado"},
+{id:"VENDA00297",regiao:"Nordeste",estado:"RS",canal:"Direto",segmento:"Pessoa Física",produto:"Acessórios",qtd:14,preco:4816.76,desconto:0.028,receita:65546.47,status:"Faturado"},
+{id:"VENDA00298",regiao:"Centro-Oeste",estado:"PR",canal:"E-commerce",segmento:"Pessoa Física",produto:"Monitor 24",qtd:20,preco:13838.2,desconto:0.065,receita:258774.34,status:"Entregue"},
+{id:"VENDA00299",regiao:"Nordeste",estado:"DF",canal:"Parceiro",segmento:"Enterprise",produto:"XPS",qtd:14,preco:23034.2,desconto:0.198,receita:258628,status:"Fechado"},
+{id:"VENDA00300",regiao:"Centro-Oeste",estado:"AM",canal:"Corporate",segmento:"Educação",produto:"PowerEdge Server",qtd:13,preco:12644.9,desconto:0.115,receita:145479.57,status:"Faturado"},
+{id:"VENDA00301",regiao:"Centro-Oeste",estado:"PE",canal:"Corporate",segmento:"Governo",produto:"Notebook Inspiron",qtd:13,preco:13277.85,desconto:0.056,receita:162945.78,status:"Entregue"},
+{id:"VENDA00302",regiao:"Norte",estado:"GO",canal:"Corporate",segmento:"Enterprise",produto:"Notebook Inspiron",qtd:15,preco:16163.14,desconto:0.139,receita:208746.95,status:"Faturado"},
+{id:"VENDA00303",regiao:"Sul",estado:"PA",canal:"Parceiro",segmento:"Pessoa Física",produto:"OptiPlex Desktop",qtd:9,preco:8613.34,desconto:0.057,receita:73101.42,status:"Faturado"},
+{id:"VENDA00304",regiao:"Sudeste",estado:"SP",canal:"Direto",segmento:"Enterprise",produto:"Notebook Latitude",qtd:2,preco:3209.71,desconto:0.157,receita:5411.57,status:"Faturado"},
+{id:"VENDA00305",regiao:"Nordeste",estado:"AM",canal:"E-commerce",segmento:"Enterprise",produto:"Notebook Latitude",qtd:14,preco:5696.1,desconto:0.138,receita:68740.53,status:"Faturado"},
+{id:"VENDA00306",regiao:"Nordeste",estado:"SP",canal:"Corporate",segmento:"Governo",produto:"Monitor 27",qtd:9,preco:2794.58,desconto:0.133,receita:21806.11,status:"Entregue"},
+{id:"VENDA00307",regiao:"Sudeste",estado:"RJ",canal:"Parceiro",segmento:"Pessoa Física",produto:"Alienware",qtd:3,preco:17829.49,desconto:0,receita:53488.47,status:"Fechado"},
+{id:"VENDA00308",regiao:"Norte",estado:"BA",canal:"Parceiro",segmento:"Educação",produto:"OptiPlex Desktop",qtd:1,preco:995.11,desconto:0.069,receita:926.45,status:"Fechado"},
+{id:"VENDA00309",regiao:"Centro-Oeste",estado:"SC",canal:"E-commerce",segmento:"Enterprise",produto:"Alienware",qtd:3,preco:18484.47,desconto:0.02,receita:54344.34,status:"Faturado"},
+{id:"VENDA00310",regiao:"Nordeste",estado:"PE",canal:"E-commerce",segmento:"Enterprise",produto:"XPS",qtd:3,preco:13638.3,desconto:0.002,receita:40833.07,status:"Entregue"},
+{id:"VENDA00311",regiao:"Norte",estado:"RJ",canal:"Parceiro",segmento:"SMB",produto:"Alienware",qtd:20,preco:17414.9,desconto:0.172,receita:288390.74,status:"Entregue"},
+{id:"VENDA00312",regiao:"Centro-Oeste",estado:"AM",canal:"Direto",segmento:"Enterprise",produto:"Monitor 27",qtd:14,preco:8410.99,desconto:0.028,receita:114456.75,status:"Entregue"},
+{id:"VENDA00313",regiao:"Nordeste",estado:"DF",canal:"Corporate",segmento:"Governo",produto:"Notebook Latitude",qtd:10,preco:5771.79,desconto:0.121,receita:50734.03,status:"Entregue"},
+{id:"VENDA00314",regiao:"Sul",estado:"RJ",canal:"Direto",segmento:"Governo",produto:"PowerEdge Server",qtd:16,preco:10138.43,desconto:0.048,receita:154428.57,status:"Faturado"},
+{id:"VENDA00315",regiao:"Nordeste",estado:"GO",canal:"Corporate",segmento:"SMB",produto:"Alienware",qtd:19,preco:10984.9,desconto:0.109,receita:185963.37,status:"Fechado"},
+{id:"VENDA00316",regiao:"Sudeste",estado:"CE",canal:"E-commerce",segmento:"Pessoa Física",produto:"Notebook Latitude",qtd:9,preco:6020.98,desconto:0.185,receita:44163.89,status:"Faturado"},
+{id:"VENDA00317",regiao:"Nordeste",estado:"PR",canal:"Direto",segmento:"Governo",produto:"Alienware",qtd:3,preco:16301,desconto:0.108,receita:43621.48,status:"Fechado"},
+{id:"VENDA00318",regiao:"Norte",estado:"PR",canal:"Corporate",segmento:"Enterprise",produto:"PowerEdge Server",qtd:5,preco:13780.64,desconto:0.078,receita:63528.75,status:"Fechado"},
+{id:"VENDA00319",regiao:"Norte",estado:"PR",canal:"Parceiro",segmento:"SMB",produto:"Notebook Inspiron",qtd:14,preco:3606.88,desconto:0.122,receita:44335.77,status:"Fechado"},
+{id:"VENDA00320",regiao:"Sul",estado:"GO",canal:"E-commerce",segmento:"Enterprise",produto:"Notebook Latitude",qtd:6,preco:12813.19,desconto:0.069,receita:71574.48,status:"Faturado"},
+{id:"VENDA00321",regiao:"Sudeste",estado:"PR",canal:"Direto",segmento:"Governo",produto:"Monitor 24",qtd:4,preco:19468.61,desconto:0.006,receita:77407.19,status:"Entregue"},
+{id:"VENDA00322",regiao:"Sul",estado:"MG",canal:"E-commerce",segmento:"Enterprise",produto:"OptiPlex Desktop",qtd:15,preco:13160.92,desconto:0.011,receita:195242.25,status:"Faturado"},
+{id:"VENDA00323",regiao:"Norte",estado:"SP",canal:"Parceiro",segmento:"SMB",produto:"Acessórios",qtd:4,preco:6327.39,desconto:0.102,receita:22727.98,status:"Faturado"},
+{id:"VENDA00324",regiao:"Norte",estado:"CE",canal:"Corporate",segmento:"Enterprise",produto:"Alienware",qtd:5,preco:5130.85,desconto:0.192,receita:20728.63,status:"Faturado"},
+{id:"VENDA00325",regiao:"Centro-Oeste",estado:"RJ",canal:"Direto",segmento:"Enterprise",produto:"Alienware",qtd:11,preco:7364.44,desconto:0.016,receita:79712.7,status:"Fechado"},
+{id:"VENDA00326",regiao:"Centro-Oeste",estado:"GO",canal:"E-commerce",segmento:"Governo",produto:"Notebook Latitude",qtd:13,preco:2468.02,desconto:0.093,receita:29100.42,status:"Fechado"},
+{id:"VENDA00327",regiao:"Centro-Oeste",estado:"DF",canal:"Parceiro",segmento:"Educação",produto:"OptiPlex Desktop",qtd:1,preco:9727.85,desconto:0.058,receita:9163.63,status:"Faturado"},
+{id:"VENDA00328",regiao:"Norte",estado:"BA",canal:"Direto",segmento:"Enterprise",produto:"PowerEdge Server",qtd:18,preco:19203.67,desconto:0.049,receita:328728.42,status:"Entregue"},
+{id:"VENDA00329",regiao:"Centro-Oeste",estado:"RJ",canal:"Parceiro",segmento:"Pessoa Física",produto:"Notebook Latitude",qtd:11,preco:835.38,desconto:0.131,receita:7985.4,status:"Fechado"},
+{id:"VENDA00330",regiao:"Centro-Oeste",estado:"RJ",canal:"Direto",segmento:"Enterprise",produto:"OptiPlex Desktop",qtd:2,preco:24335.93,desconto:0.028,receita:47309.05,status:"Entregue"},
+{id:"VENDA00331",regiao:"Norte",estado:"CE",canal:"Parceiro",segmento:"Educação",produto:"Monitor 27",qtd:15,preco:24384.23,desconto:0.017,receita:359545.47,status:"Fechado"},
+{id:"VENDA00332",regiao:"Centro-Oeste",estado:"PR",canal:"E-commerce",segmento:"Educação",produto:"Notebook Latitude",qtd:14,preco:16831.14,desconto:0.026,receita:229509.43,status:"Entregue"},
+{id:"VENDA00333",regiao:"Nordeste",estado:"MG",canal:"Direto",segmento:"Enterprise",produto:"Monitor 27",qtd:15,preco:7381.33,desconto:0.015,receita:109059.15,status:"Fechado"},
+{id:"VENDA00334",regiao:"Centro-Oeste",estado:"GO",canal:"Parceiro",segmento:"Educação",produto:"OptiPlex Desktop",qtd:15,preco:8399.61,desconto:0.024,receita:122970.29,status:"Faturado"},
+{id:"VENDA00335",regiao:"Centro-Oeste",estado:"DF",canal:"Direto",segmento:"Enterprise",produto:"Monitor 24",qtd:4,preco:2988.19,desconto:0.162,receita:10016.41,status:"Faturado"},
+{id:"VENDA00336",regiao:"Norte",estado:"AM",canal:"E-commerce",segmento:"Governo",produto:"Notebook Inspiron",qtd:8,preco:24235.28,desconto:0.079,receita:178565.54,status:"Fechado"},
+{id:"VENDA00337",regiao:"Norte",estado:"PE",canal:"Direto",segmento:"Enterprise",produto:"Alienware",qtd:15,preco:14254.08,desconto:0.11,receita:190291.97,status:"Fechado"},
+{id:"VENDA00338",regiao:"Centro-Oeste",estado:"AM",canal:"Direto",segmento:"Pessoa Física",produto:"Notebook Latitude",qtd:8,preco:3963.31,desconto:0.165,receita:26474.91,status:"Entregue"},
+{id:"VENDA00339",regiao:"Sudeste",estado:"GO",canal:"Parceiro",segmento:"SMB",produto:"Notebook Inspiron",qtd:1,preco:24931.31,desconto:0.04,receita:23934.06,status:"Faturado"},
+{id:"VENDA00340",regiao:"Sudeste",estado:"DF",canal:"Corporate",segmento:"Educação",produto:"Notebook Latitude",qtd:15,preco:2025.43,desconto:0.185,receita:24760.88,status:"Fechado"},
+{id:"VENDA00341",regiao:"Centro-Oeste",estado:"PR",canal:"Corporate",segmento:"Enterprise",produto:"Alienware",qtd:6,preco:9365.43,desconto:0.182,receita:45965.53,status:"Fechado"},
+{id:"VENDA00342",regiao:"Norte",estado:"RJ",canal:"E-commerce",segmento:"Educação",produto:"Monitor 24",qtd:16,preco:10770.21,desconto:0.11,receita:153367.79,status:"Fechado"},
+{id:"VENDA00343",regiao:"Sul",estado:"GO",canal:"Direto",segmento:"Educação",produto:"PowerEdge Server",qtd:17,preco:6829.38,desconto:0.199,receita:92995.67,status:"Entregue"},
+{id:"VENDA00344",regiao:"Sul",estado:"CE",canal:"E-commerce",segmento:"Educação",produto:"OptiPlex Desktop",qtd:18,preco:19710.73,desconto:0.069,receita:330312.41,status:"Faturado"},
+{id:"VENDA00345",regiao:"Centro-Oeste",estado:"SP",canal:"Corporate",segmento:"Pessoa Física",produto:"Notebook Latitude",qtd:11,preco:15250.22,desconto:0.006,receita:166745.91,status:"Faturado"},
+{id:"VENDA00346",regiao:"Sul",estado:"GO",canal:"Direto",segmento:"Enterprise",produto:"XPS",qtd:4,preco:6798.14,desconto:0.048,receita:25887.32,status:"Entregue"},
+{id:"VENDA00347",regiao:"Centro-Oeste",estado:"PA",canal:"Direto",segmento:"Governo",produto:"Monitor 27",qtd:6,preco:5061.63,desconto:0.119,receita:26755.78,status:"Entregue"},
+{id:"VENDA00348",regiao:"Sudeste",estado:"CE",canal:"E-commerce",segmento:"Enterprise",produto:"XPS",qtd:19,preco:23750.52,desconto:0.167,receita:375899.48,status:"Faturado"},
+{id:"VENDA00349",regiao:"Sul",estado:"PE",canal:"Direto",segmento:"Governo",produto:"Notebook Inspiron",qtd:2,preco:6429.49,desconto:0.044,receita:12293.18,status:"Entregue"},
+{id:"VENDA00350",regiao:"Centro-Oeste",estado:"SP",canal:"Direto",segmento:"Enterprise",produto:"XPS",qtd:11,preco:18149.89,desconto:0.184,receita:162913.41,status:"Entregue"},
+{id:"VENDA00351",regiao:"Centro-Oeste",estado:"DF",canal:"Corporate",segmento:"Pessoa Física",produto:"Notebook Inspiron",qtd:17,preco:21628.2,desconto:0.192,receita:297084.96,status:"Fechado"},
+{id:"VENDA00352",regiao:"Sudeste",estado:"GO",canal:"Corporate",segmento:"Governo",produto:"Monitor 24",qtd:11,preco:4102.13,desconto:0.032,receita:43679.48,status:"Fechado"},
+{id:"VENDA00353",regiao:"Nordeste",estado:"BA",canal:"E-commerce",segmento:"Governo",produto:"Acessórios",qtd:12,preco:6202.34,desconto:0.118,receita:65645.57,status:"Fechado"},
+{id:"VENDA00354",regiao:"Sul",estado:"SP",canal:"Parceiro",segmento:"Pessoa Física",produto:"Notebook Latitude",qtd:19,preco:10276.75,desconto:0.199,receita:156401.86,status:"Faturado"},
+{id:"VENDA00355",regiao:"Norte",estado:"RS",canal:"E-commerce",segmento:"Governo",produto:"Acessórios",qtd:4,preco:23467.84,desconto:0.028,receita:91242.96,status:"Fechado"},
+{id:"VENDA00356",regiao:"Norte",estado:"SC",canal:"E-commerce",segmento:"SMB",produto:"Monitor 27",qtd:10,preco:1057.77,desconto:0.042,receita:15458.81,status:"Entregue"},
+{id:"VENDA00357",regiao:"Nordeste",estado:"BA",canal:"Corporate",segmento:"Educação",produto:"Notebook Latitude",qtd:13,preco:11404.93,desconto:0.084,receita:135809.91,status:"Faturado"},
+{id:"VENDA00358",regiao:"Sul",estado:"AM",canal:"Parceiro",segmento:"Enterprise",produto:"Alienware",qtd:4,preco:20857.13,desconto:0.158,receita:70246.81,status:"Faturado"},
+{id:"VENDA00359",regiao:"Norte",estado:"RJ",canal:"E-commerce",segmento:"Enterprise",produto:"Notebook Latitude",qtd:10,preco:1285.89,desconto:0.052,receita:12190.24,status:"Faturado"},
+{id:"VENDA00360",regiao:"Centro-Oeste",estado:"PA",canal:"Corporate",segmento:"SMB",produto:"Notebook Inspiron",qtd:18,preco:23592.39,desconto:0.196,receita:341429.07,status:"Faturado"},
+{id:"VENDA00361",regiao:"Nordeste",estado:"RS",canal:"Corporate",segmento:"Pessoa Física",produto:"Acessórios",qtd:14,preco:4601.91,desconto:0.02,receita:63138.21,status:"Entregue"},
+{id:"VENDA00362",regiao:"Sudeste",estado:"PA",canal:"Corporate",segmento:"Enterprise",produto:"Monitor 24",qtd:10,preco:7997.1,desconto:0.019,receita:78451.55,status:"Fechado"},
+{id:"VENDA00363",regiao:"Sul",estado:"PE",canal:"Parceiro",segmento:"SMB",produto:"Notebook Latitude",qtd:14,preco:2920.61,desconto:0.165,receita:34141.93,status:"Fechado"},
+{id:"VENDA00364",regiao:"Norte",estado:"PR",canal:"Corporate",segmento:"Educação",produto:"XPS",qtd:10,preco:24444.8,desconto:0.095,receita:221225.44,status:"Faturado"},
+{id:"VENDA00365",regiao:"Sudeste",estado:"SC",canal:"Parceiro",segmento:"Educação",produto:"Notebook Inspiron",qtd:18,preco:10178.16,desconto:0.074,receita:169649.57,status:"Fechado"},
+{id:"VENDA00366",regiao:"Sul",estado:"SP",canal:"Parceiro",segmento:"SMB",produto:"OptiPlex Desktop",qtd:15,preco:7174.3,desconto:0.167,receita:89642.88,status:"Fechado"},
+{id:"VENDA00367",regiao:"Sul",estado:"SP",canal:"Corporate",segmento:"Pessoa Física",produto:"Precision Workstation",qtd:14,preco:24291.07,desconto:0.118,receita:299946.13,status:"Faturado"},
+{id:"VENDA00368",regiao:"Norte",estado:"BA",canal:"Direto",segmento:"Pessoa Física",produto:"OptiPlex Desktop",qtd:19,preco:22136.02,desconto:0.095,receita:380628.86,status:"Entregue"},
+{id:"VENDA00369",regiao:"Sudeste",estado:"MG",canal:"Parceiro",segmento:"Enterprise",produto:"Acessórios",qtd:20,preco:4368.23,desconto:0.19,receita:70765.33,status:"Fechado"},
+{id:"VENDA00370",regiao:"Nordeste",estado:"AM",canal:"Parceiro",segmento:"Pessoa Física",produto:"Notebook Latitude",qtd:14,preco:2696.52,desconto:0.137,receita:32579.35,status:"Faturado"},
+{id:"VENDA00371",regiao:"Centro-Oeste",estado:"PR",canal:"Corporate",segmento:"SMB",produto:"Notebook Inspiron",qtd:3,preco:10192,desconto:0.079,receita:28160.5,status:"Entregue"},
+{id:"VENDA00372",regiao:"Sul",estado:"PA",canal:"Direto",segmento:"SMB",produto:"Alienware",qtd:4,preco:10829.51,desconto:0.03,receita:42018.5,status:"Entregue"},
+{id:"VENDA00373",regiao:"Centro-Oeste",estado:"BA",canal:"Corporate",segmento:"Pessoa Física",produto:"Monitor 24",qtd:18,preco:22099.29,desconto:0.176,receita:327776.67,status:"Entregue"},
+{id:"VENDA00374",regiao:"Sul",estado:"AM",canal:"Corporate",segmento:"SMB",produto:"Notebook Latitude",qtd:6,preco:7465.02,desconto:0.029,receita:43491.21,status:"Faturado"},
+{id:"VENDA00375",regiao:"Centro-Oeste",estado:"SP",canal:"E-commerce",segmento:"Governo",produto:"PowerEdge Server",qtd:2,preco:18847.15,desconto:0.184,receita:30758.55,status:"Faturado"},
+{id:"VENDA00376",regiao:"Centro-Oeste",estado:"DF",canal:"Corporate",segmento:"Governo",produto:"OptiPlex Desktop",qtd:4,preco:24334.42,desconto:0.046,receita:92860.15,status:"Faturado"},
+{id:"VENDA00377",regiao:"Sudeste",estado:"DF",canal:"Corporate",segmento:"Pessoa Física",produto:"Acessórios",qtd:3,preco:5348.04,desconto:0.042,receita:15370.27,status:"Faturado"},
+{id:"VENDA00378",regiao:"Sudeste",estado:"MG",canal:"Direto",segmento:"Enterprise",produto:"Precision Workstation",qtd:6,preco:2387.93,desconto:0.142,receita:12293.06,status:"Fechado"},
+{id:"VENDA00379",regiao:"Centro-Oeste",estado:"DF",canal:"Parceiro",segmento:"Governo",produto:"Notebook Latitude",qtd:8,preco:1600.32,desconto:0.01,receita:12674.53,status:"Faturado"},
+{id:"VENDA00380",regiao:"Norte",estado:"RS",canal:"E-commerce",segmento:"Educação",produto:"Precision Workstation",qtd:13,preco:16176.92,desconto:0.025,receita:205042.46,status:"Entregue"},
+{id:"VENDA00381",regiao:"Nordeste",estado:"PR",canal:"Direto",segmento:"Governo",produto:"XPS",qtd:16,preco:15002.5,desconto:0.07,receita:223237.2,status:"Fechado"},
+{id:"VENDA00382",regiao:"Nordeste",estado:"RS",canal:"Parceiro",segmento:"Enterprise",produto:"Notebook Latitude",qtd:6,preco:21462.48,desconto:0.156,receita:108686,status:"Faturado"},
+{id:"VENDA00383",regiao:"Norte",estado:"PE",canal:"Parceiro",segmento:"Enterprise",produto:"Precision Workstation",qtd:1,preco:21724.04,desconto:0.193,receita:17531.3,status:"Entregue"},
+{id:"VENDA00384",regiao:"Centro-Oeste",estado:"BA",canal:"Corporate",segmento:"Governo",produto:"PowerEdge Server",qtd:9,preco:15521.92,desconto:0.189,receita:113294.49,status:"Faturado"},
+{id:"VENDA00385",regiao:"Sul",estado:"BA",canal:"Direto",segmento:"SMB",produto:"PowerEdge Server",qtd:15,preco:8111.91,desconto:0.104,receita:109024.07,status:"Entregue"},
+{id:"VENDA00386",regiao:"Norte",estado:"PE",canal:"Direto",segmento:"Governo",produto:"Precision Workstation",qtd:20,preco:15539.01,desconto:0.06,receita:292133.39,status:"Faturado"},
+{id:"VENDA00387",regiao:"Centro-Oeste",estado:"RS",canal:"Parceiro",segmento:"Pessoa Física",produto:"Monitor 24",qtd:9,preco:16678.09,desconto:0.19,receita:121583.28,status:"Fechado"},
+{id:"VENDA00388",regiao:"Norte",estado:"AM",canal:"Corporate",segmento:"Governo",produto:"Acessórios",qtd:13,preco:16784.83,desconto:0.136,receita:188527.21,status:"Faturado"},
+{id:"VENDA00389",regiao:"Sul",estado:"RS",canal:"E-commerce",segmento:"Enterprise",produto:"Alienware",qtd:13,preco:18628.92,desconto:0.117,receita:213841.37,status:"Entregue"},
+{id:"VENDA00390",regiao:"Sul",estado:"MG",canal:"E-commerce",segmento:"SMB",produto:"OptiPlex Desktop",qtd:12,preco:13077.02,desconto:0.169,receita:130404.04,status:"Faturado"},
+{id:"VENDA00391",regiao:"Centro-Oeste",estado:"AM",canal:"Direto",segmento:"Enterprise",produto:"Monitor 24",qtd:18,preco:19262.62,desconto:0.037,receita:333898.26,status:"Faturado"},
+{id:"VENDA00392",regiao:"Centro-Oeste",estado:"PA",canal:"E-commerce",segmento:"Educação",produto:"Monitor 24",qtd:14,preco:19871.79,desconto:0.066,receita:259843.53,status:"Fechado"},
+{id:"VENDA00393",regiao:"Sudeste",estado:"RS",canal:"Direto",segmento:"Educação",produto:"Notebook Latitude",qtd:19,preco:14843.58,desconto:0.124,receita:247056.55,status:"Entregue"},
+{id:"VENDA00394",regiao:"Nordeste",estado:"SC",canal:"Corporate",segmento:"Pessoa Física",produto:"Alienware",qtd:2,preco:21874.55,desconto:0.03,receita:42436.63,status:"Faturado"},
+{id:"VENDA00395",regiao:"Nordeste",estado:"SC",canal:"Direto",segmento:"SMB",produto:"Monitor 27",qtd:6,preco:19650.38,desconto:0.098,receita:106347.86,status:"Faturado"},
+{id:"VENDA00396",regiao:"Norte",estado:"MG",canal:"Corporate",segmento:"Educação",produto:"PowerEdge Server",qtd:6,preco:14745.95,desconto:0.032,receita:85644.48,status:"Faturado"},
+{id:"VENDA00397",regiao:"Centro-Oeste",estado:"SP",canal:"E-commerce",segmento:"Pessoa Física",produto:"OptiPlex Desktop",qtd:13,preco:912.99,desconto:0.107,receita:10598.9,status:"Fechado"},
+{id:"VENDA00398",regiao:"Centro-Oeste",estado:"MG",canal:"Direto",segmento:"Educação",produto:"Notebook Latitude",qtd:8,preco:6275.63,desconto:0.175,receita:41419.16,status:"Entregue"},
+{id:"VENDA00399",regiao:"Centro-Oeste",estado:"PE",canal:"E-commerce",segmento:"Educação",produto:"XPS",qtd:3,preco:20737.02,desconto:0.06,receita:58478.4,status:"Entregue"},
+{id:"VENDA00400",regiao:"Sudeste",estado:"SP",canal:"Parceiro",segmento:"Enterprise",produto:"Monitor 27",qtd:16,preco:9493.87,desconto:0.038,receita:146129.65,status:"Entregue"}
+];
+
+// ===== LÓGICA DO DASHBOARD =====
+let currentData = [...rawData];
+let chartProdutos, chartCanal, chartRegiao, chartReceita;
+
+function formatCurrency(v){return 'R$ '+v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+function getUnique(arr,key){return [...new Set(arr.map(i=>i[key]))].filter(Boolean).sort();}
+
+// Popula produtos
+(()=>{
+const sel=document.getElementById('filterProduto');
+getUnique(rawData,'produto').forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
+})();
+
+function applyFilters(){
+const regiao=document.getElementById('filterRegiao').value;
+const produto=document.getElementById('filterProduto').value;
+const valMin=parseFloat(document.getElementById('filterValorMin').value)||0;
+const valMax=parseFloat(document.getElementById('filterValorMax').value)||Infinity;
+const qtdMin=parseInt(document.getElementById('filterQtdMin').value)||0;
+const qtdMax=parseInt(document.getElementById('filterQtdMax').value)||Infinity;
+currentData=rawData.filter(d=>{
+if(regiao!=='all'&&d.regiao!==regiao)return false;
+if(produto!=='all'&&d.produto!==produto)return false;
+if(d.receita<valMin||d.receita>valMax)return false;
+if(d.qtd<qtdMin||d.qtd>qtdMax)return false;
+return true;
+});
+renderDashboard();
+}
+
+function renderDashboard(){
+const data=currentData;
+// KPI
+const prodQtd={};data.forEach(d=>{prodQtd[d.produto]=(prodQtd[d.produto]||0)+d.qtd;});
+let topProd='—',topQtd=0;for(const[p,q]of Object.entries(prodQtd)){if(q>topQtd){topQtd=q;topProd=p;}}
+document.getElementById('kpiTopProduct').textContent=topProd;
+document.getElementById('kpiTopProductSub').innerHTML=`<i class="fas fa-arrow-up"></i> ${topQtd} und`;
+document.getElementById('kpiTopDemand').textContent=topProd;
+document.getElementById('kpiTopDemandSub').innerHTML=`<i class="fas fa-boxes"></i> ${topQtd} und`;
+
+const canalCount={};data.forEach(d=>{canalCount[d.canal]=(canalCount[d.canal]||0)+1;});
+let topCanal='—',topCC=0;for(const[c,n]of Object.entries(canalCount)){if(n>topCC){topCC=n;topCanal=c;}}
+const pct=data.length?((topCC/data.length)*100).toFixed(1):0;
+document.getElementById('kpiTopChannel').textContent=topCanal;
+document.getElementById('kpiTopChannelSub').innerHTML=`<i class="fas fa-percent"></i> ${pct}% vendas`;
+
+const totalRev=data.reduce((s,d)=>s+d.receita,0);
+document.getElementById('kpiTotalRevenue').textContent=formatCurrency(totalRev);
+document.getElementById('kpiTotalSub').innerHTML=`<i class="fas fa-shopping-cart"></i> ${data.length} transações`;
+
+// Table
+const tbody=document.getElementById('tableBody');
+const slice=data.slice(0,50);
+tbody.innerHTML=slice.map(d=>`<tr><td style="font-weight:500;color:#0076C8">${d.id}</td><td>${d.regiao}</td><td>${d.estado}</td><td><strong>${d.produto}</strong></td><td>${d.qtd}</td><td>${formatCurrency(d.preco)}</td><td>${formatCurrency(d.receita)}</td><td>${d.canal}</td><td><span class="status-badge ${d.status.toLowerCase()}">${d.status}</span></td></tr>`).join('');
+document.getElementById('tableCount').textContent=data.length;
+document.getElementById('rowCount').textContent=data.length;
+
+// Charts
+updateCharts(data);
+}
+
+function updateCharts(data){
+const prodMap={},canalMap={},regiaoMap={},prodRec={};
+data.forEach(d=>{prodMap[d.produto]=(prodMap[d.produto]||0)+d.qtd;canalMap[d.canal]=(canalMap[d.canal]||0)+d.qtd;regiaoMap[d.regiao]=(regiaoMap[d.regiao]||0)+d.qtd;prodRec[d.produto]=(prodRec[d.produto]||0)+d.receita;});
+const sortObj=o=>Object.fromEntries(Object.entries(o).sort((a,b)=>b[1]-a[1]));
+const p=sortObj(prodMap),c=sortObj(canalMap),r=sortObj(regiaoMap),pr=sortObj(prodRec);
+const colors=['#0076C8','#004B87','#2A8DDB','#6BB5F0','#B3D9F5','#9AC2E0','#5E9EC0','#1F6390'];
+const getCol=i=>colors[i%colors.length];
+
+const pL=Object.keys(p).slice(0,8),pV=Object.values(p).slice(0,8);
+if(chartProdutos)chartProdutos.destroy();
+chartProdutos=new Chart(document.getElementById('chartProdutos'),{type:'bar',data:{labels:pL,datasets:[{label:'Qtd',data:pV,backgroundColor:pL.map((_,i)=>getCol(i)),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+
+const cL=Object.keys(c),cV=Object.values(c);
+if(chartCanal)chartCanal.destroy();
+chartCanal=new Chart(document.getElementById('chartCanal'),{type:'doughnut',data:{labels:cL,datasets:[{data:cV,backgroundColor:cL.map((_,i)=>getCol(i)),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},cutout:'65%'}});
+
+const rL=Object.keys(r),rV=Object.values(r);
+if(chartRegiao)chartRegiao.destroy();
+chartRegiao=new Chart(document.getElementById('chartRegiao'),{type:'bar',data:{labels:rL,datasets:[{label:'Qtd',data:rV,backgroundColor:rL.map((_,i)=>getCol(i+2)),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+
+const recL=Object.keys(pr).slice(0,8),recV=Object.values(pr).slice(0,8);
+if(chartReceita)chartReceita.destroy();
+chartReceita=new Chart(document.getElementById('chartReceita'),{type:'line',data:{labels:recL,datasets:[{label:'Receita',data:recV,borderColor:'#0076C8',backgroundColor:'rgba(0,118,200,0.08)',fill:true,tension:0.3,pointBackgroundColor:recL.map((_,i)=>getCol(i)),pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}});
+}
+
+function resetFilters(){
+document.getElementById('filterRegiao').value='all';
+document.getElementById('filterProduto').value='all';
+document.getElementById('filterValorMin').value='0';
+document.getElementById('filterValorMax').value='500000';
+document.getElementById('filterQtdMin').value='0';
+document.getElementById('filterQtdMax').value='20';
+applyFilters();
+}
+
+document.getElementById('applyFilters').addEventListener('click',applyFilters);
+document.getElementById('resetFilters').addEventListener('click',resetFilters);
+document.querySelectorAll('#filterSection input').forEach(inp=>inp.addEventListener('keydown',e=>{if(e.key==='Enter')applyFilters();}));
+applyFilters();
+</script>
+</body>
+</html>
